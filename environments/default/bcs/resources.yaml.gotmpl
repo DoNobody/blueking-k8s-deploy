@@ -1,0 +1,113 @@
+bcs-api-gateway:
+  apisix:
+    resources:
+      limits:
+        cpu: 8
+        memory: 8Gi
+      requests:
+        cpu: 0
+        memory: 512Mi
+  gateway:
+     resources:
+      limits:
+        cpu: 2
+        memory: 1Gi
+      requests:
+        cpu: 0
+        memory: 512Mi
+bcs-cluster-manager:
+  resources:
+    limits:
+      cpu: 2
+      memory: 2Gi
+    requests:
+      cpu: 0.025
+      memory: 2Gi
+bcs-storage:
+  resources:
+    limits:
+      cpu: 4
+      memory: 8Gi
+    requests:
+      cpu: 0.143
+      memory: 100Mi
+bcs-user-manager:
+  resources:
+    limits:
+      cpu: 2
+      memory: 1Gi
+    requests:
+      cpu: 0.025
+      memory: 512Mi
+bcs-k8s-stack:
+  bcs-k8s-watch:
+    resources:
+      requests:
+        cpu: 0.163
+        memory: 138Mi
+  bcs-kube-agent:
+    resources:
+      requests:
+        cpu: 0.025
+        memory: 100Mi
+  bcs-gamedeployment-operator:
+    resources:
+      requests:
+        cpu: 0.025
+        memory: 100Mi
+  bcs-gamestatefulset-operator:
+    resources:
+      requests:
+        cpu: 0.025
+        memory: 100Mi
+  bcs-hook-operator:
+    resources:
+      requests:
+        cpu: 0.025
+        memory: 100Mi
+  bcs-webhook-server:
+    resources:
+      requests:
+        cpu: 0.025
+        memory: 100Mi
+bcs-ui:
+  app:
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "0.011"
+      limits:
+        memory: "4Gi"
+        cpu: "4"
+    ## celery 进程占用资源较高，单独配置
+    celeryResources:
+      requests:
+        memory: "512Mi"
+        cpu: "0.011"
+      limits:
+        memory: "4096Mi"
+        cpu: "2"
+  cc:
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "0.025"
+      limits:
+        memory: "1024Mi"
+        cpu: "2"
+bcs-webconsole:
+  resources:
+    limits:
+      cpu: 2
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 512Mi
+bcs-monitor:
+  resources:
+    limits:
+      cpu: 2
+      memory: 1Gi
+    requests:
+      cpu: 1
+      memory: 512Mi

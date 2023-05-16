@@ -1,0 +1,207 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+commonLabels:
+  tier: base
+
+## Helmfile runs various helm commands to converge the current state in the live cluster to the desired state defined here.
+releases:
+  - name: bk-repo
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bkrepo
+    version: {{ index .Values.version "bkrepo" }}
+    missingFileHandler: Warn
+    labels:
+      seq: first
+    values:
+    - ./environments/default/bkrepo-values.yaml.gotmpl
+    - ./environments/default/bkrepo-custom-values.yaml.gotmpl
+
+  - name: bk-auth
+    namespace: {{ .Values.namespace }} 
+    chart: blueking/bkauth
+    version: {{ .Values.version.bkauth }}
+    missingFileHandler: Warn
+    labels:
+      seq: first
+    values:
+    - environments/default/bkauth-values.yaml.gotmpl
+    - environments/default/bkauth-custom-values.yaml.gotmpl
+
+  - name: bk-apigateway
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bk-apigateway
+    version: {{ index .Values.version "bk-apigateway" }}
+    missingFileHandler: Warn
+    labels:
+      seq: first
+    values:
+    - ./environments/default/bkapigateway-values.yaml.gotmpl
+    - ./environments/default/bkapigateway-custom-values.yaml.gotmpl
+
+  - name: bk-iam
+    namespace: {{ .Values.namespace }} 
+    chart: blueking/bkiam
+    version: {{ index .Values.version "bkiam" }}
+    missingFileHandler: Warn
+    labels:
+      seq: second
+    values:
+    - ./environments/default/bkiam-values.yaml.gotmpl
+    - ./environments/default/bkiam-custom-values.yaml.gotmpl
+
+  - name: bk-ssm
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bkssm
+    version: {{ .Values.version.bkssm }}
+    missingFileHandler: Warn
+    labels:
+      seq: second
+    values:
+    - ./environments/default/bkssm-values.yaml.gotmpl
+    - ./environments/default/bkssm-custom-values.yaml.gotmpl
+
+  - name: bk-console
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bk-console
+    version: {{ index .Values.version "bk-console" }}
+    missingFileHandler: Warn
+    labels:
+      seq: second
+    values:
+    - ./environments/default/bkconsole-values.yaml.gotmpl
+    - ./environments/default/bkconsole-custom-values.yaml.gotmpl
+
+  - name: bk-user
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bk-user
+    version: {{ index .Values.version "bk-user" }}
+    missingFileHandler: Warn
+    labels:
+      seq: third
+    values:
+    - ./environments/default/bkuser-values.yaml.gotmpl
+    - ./environments/default/bkuser-custom-values.yaml.gotmpl
+
+  - name: bk-iam-saas
+    namespace: {{ .Values.namespace }} 
+    chart: blueking/bkiam-saas
+    version: {{ index .Values.version "bkiam-saas" }}
+    missingFileHandler: Warn
+    labels:
+      seq: third
+    values:
+    - ./environments/default/bkiam-saas-values.yaml.gotmpl
+    - ./environments/default/bkiam-saas-custom-values.yaml.gotmpl
+        
+  - name: bk-iam-search-engine
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bkiam-search-engine
+    version: {{ index .Values.version "bkiam-search-engine" }}
+    missingFileHandler: Warn
+    labels:
+      seq: third
+    values:
+    - ./environments/default/bkiam-search-engine-values.yaml.gotmpl
+    - ./environments/default/bkiam-search-engine-custom-values.yaml.gotmpl
+
+  - name: bk-gse
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bk-gse-ce
+    version: {{ index .Values.version "bk-gse-ce" }}
+    missingFileHandler: Warn
+    labels:
+      seq: third
+    values:
+    - ./environments/default/bkgse-ce-values.yaml.gotmpl
+    - ./environments/default/bkgse-ce-custom-values.yaml.gotmpl
+
+  - name: bk-cmdb
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bk-cmdb
+    version: {{ index .Values.version "bk-cmdb" }}
+    missingFileHandler: Warn
+    labels:
+      seq: third
+    # wait for k8s resources via --wait. (default false)
+    wait: false
+    # if set and --wait enabled, will wait until all Jobs have been completed before marking the release as successful. It will wait for as long as --timeout (default false, Implemented in Helm3.5)
+    waitForJobs: true
+    values:
+    - ./environments/default/bkcmdb-values.yaml.gotmpl
+    - ./environments/default/bkcmdb-custom-values.yaml.gotmpl
+
+  - name: bk-paas
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bkpaas3
+    version: {{ index .Values.version "bkpaas3" }}
+    missingFileHandler: Warn
+    timeout: 900
+    labels:
+      seq: third
+    values:
+    - ./environments/default/bkpaas3-values.yaml.gotmpl
+    - ./environments/default/bkpaas3-custom-values.yaml.gotmpl
+
+  - name: bk-applog
+    namespace: {{ .Values.namespace }}
+    labels:
+      seq: third
+    chart: blueking/bkapp-log-collection
+    version: {{ index .Values.version "bkapp-log-collection" }}
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/bkapplog-values.yaml.gotmpl
+    - ./environments/default/bkapplog-custom-values.yaml.gotmpl
+
+  - name: bk-ingress-nginx
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bk-ingress-nginx
+    labels:
+      seq: third
+    version: {{ index .Values.version "bk-ingress-nginx" }}
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/bkingress-nginx-values.yaml.gotmpl
+    - ./environments/default/bkingress-nginx-custom-values.yaml.gotmpl
+
+  - name: bk-ingress-rule
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bk-ingress-rule
+    labels:
+      seq: third
+    version: {{ index .Values.version "bk-ingress-rule" }}
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/bkingress-rule-values.yaml.gotmpl
+    - ./environments/default/bkingress-rule-custom-values.yaml.gotmpl
+
+  - name: bk-job
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bk-job
+    version: {{ index .Values.version "bk-job" }}
+    missingFileHandler: Warn
+    labels:
+      seq: fourth
+    values:
+    - ./environments/default/bkjob-values.yaml.gotmpl
+    - ./environments/default/bkjob-custom-values.yaml.gotmpl
+
+  - name: bk-nodeman
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bk-nodeman
+    version: {{ index .Values.version "bk-nodeman" }}
+    missingFileHandler: Warn
+    labels:
+      seq: fifth
+    hooks:
+      - events: ["presync"]
+        showlogs: true
+        command: "./scripts/add_bkrepo_bucket.sh"
+        args: ["http://bkrepo.{{`{{.Values.domain.bkDomain }}`}}", "{{`{{.Values.bknodeman.bkrepo.repoName}}`}}", "{{`{{.Values.bknodeman.bkrepo.username}}`}}", "{{`{{.Values.bknodeman.bkrepo.password}}`}}", "true"]
+    values:
+    - ./environments/default/bknodeman-values.yaml.gotmpl
+    - ./environments/default/bknodeman-custom-values.yaml.gotmpl

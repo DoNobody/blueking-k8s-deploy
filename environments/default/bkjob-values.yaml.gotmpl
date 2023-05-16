@@ -1,0 +1,126 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+appCode: bk_job
+appSecret: {{ .Values.appSecret.bk_job }}
+
+# 依赖的蓝鲸其他产品服务地址
+bkDomainScheme: {{ .Values.bkDomainScheme }}
+bkComponentApiUrl: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}
+bkLoginUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}/login/
+bkCmdbUrl: {{ .Values.bkDomainScheme }}://cmdb.{{ .Values.domain.bkDomain }}
+bkIamApiUrl: http://bkiam-web
+bkRepoUrl: {{ .Values.bkDomainScheme }}://bkrepo.{{ .Values.domain.bkDomain }}
+bkNodemanUrl: {{ .Values.bkDomainScheme }}://bknodeman.{{ .Values.domain.bkDomain }}
+
+gse:
+  ssl:
+    keystore:
+      base64Content: {{ readFile "cert/gse_job_api_client.keystore" | b64enc }}
+      password: {{ .Values.gse.cert.password }}
+    truststore:
+      base64Content: {{ readFile "cert/gse_job_api_client.truststore" | b64enc }}
+      password: {{ .Values.gse.cert.password }}
+  server:
+    discovery:
+      type: ""
+  cacheApiServer:
+    host: bk-gse-task
+  taskserver:
+    host: bk-gse-task
+  script:
+    rootPath: "/tmp/bkjob"
+
+## 蓝鲸制品库配置
+artifactory:
+  admin:
+    # 制品库admin账号
+    username: {{ .Values.bkrepo.common.username }}
+    # 制品库admin账号的密码
+    password: {{ .Values.bkrepo.common.password }}
+  job:
+    # 作业平台在制品库的官方账号，初始化时由作业平台通过Admin账号自动创建
+    username: {{ .Values.job.bkrepo.username }}
+    # 作业平台在制品库的官方账号对应的密码，初始化时由作业平台通过Admin账号自动创建
+    password: {{ .Values.job.bkrepo.password }}
+    # 作业平台在制品库的官方项目，初始化时由作业平台通过Admin账号自动创建
+    project: {{ .Values.job.bkrepo.project }}
+job:
+  encrypt:
+    # 用于加密作业平台中存储的数据库密码的密码（部署后不可变）
+    password: job#2021
+  web:
+    domain: job.{{ .Values.domain.bkDomain }}
+    apiDomain: jobapi.{{ .Values.domain.bkDomain }}
+    https:
+      # 是否开启HTTPS
+      enabled: false
+      # 开启HTTPS时使用的证书base64编码
+      certBase64: ""
+      # 开启HTTPS时使用的证书私钥base64编码
+      keyBase64: ""
+
+gatewayConfig:
+  server:
+    ssl:
+      p12:
+        # job-gateway开启https时使用的p12文件单行base64编码内容
+        base64Content: {{ readFile "cert/job_server.p12" | b64enc }}
+      keystore:
+        # job-gateway开启https时使用的keystore的密码，需要和esb配置的证书使用密码保持一致
+        password: {{ .Values.job.cert.password }}
+      truststore:
+        # job-gateway开启https时使用的p12证书truststore单行base64编码内容
+        base64Content: {{ readFile "cert/job_server.truststore" | b64enc }}
+        # job-gateway开启https时使用的truststore的密码，需要和esb配置的证书使用密码保持一致
+        password: {{ .Values.job.cert.password }}
+
+rabbitmq:
+  enabled: false
+externalRabbitMQ:
+  host: "bk-rabbitmq"
+  port: 5672
+  username: {{ .Values.job.rabbitmq.user }}
+  password: {{ .Values.job.rabbitmq.password }}
+  vhost: {{ .Values.job.rabbitmq.vhost }}
+
+mariadb:
+  enabled: false
+externalMariaDB:
+  host: {{ .Values.mysql.host }}
+  port: {{ .Values.mysql.port }}
+  username: root
+  password: {{ .Values.mysql.rootPassword }}
+  rootPassword: {{ .Values.mysql.rootPassword }}
+
+redis:
+  enabled: false
+externalRedis:
+  architecture: standalone
+  host: {{ .Values.redis.host }}
+  port: {{ .Values.redis.port }}
+  password: {{ .Values.redis.password }}
+
+mongodb:
+  enabled: false
+externalMongoDB:
+  architecture: "replicaset"
+  uri: mongodb://{{ .Values.job.mongodb.username }}:{{ .Values.job.mongodb.password }}@{{ .Values.mongodb.host_port }}/{{ .Values.job.mongodb.database }}?replicaSet={{ .Values.mongodb.rsName }}&authSource={{ .Values.job.mongodb.database }} 
+
+## 蓝鲸日志采集配置
+bkLogConfig:
+  # 是否开启蓝鲸日志采集
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  file:
+    serviceLog:
+      # 微服务日志采集到的dataId
+      dataId: 1110034
+    accessLog:
+      # job-gateway网关access日志采集到的dataId
+      dataId: 1110033
+  std:
+    # 容器标准输出日志采集到的dataId
+    dataId: 1110032
+
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+

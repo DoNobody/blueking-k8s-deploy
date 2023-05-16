@@ -1,0 +1,98 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+  ipc:
+    # ipc 文件路径
+    path: "/var/run"
+    # ipc 文件名
+    endpoint: "ipc.state.report"
+    # hostid 文件路径
+    hostid: "/var/lib/gse/host"
+
+bkmonitor-operator-charts:
+  bkmonitor-operator:
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi
+      requests:
+        cpu: 50m
+        memory: 512Mi
+
+  bkmonitorbeat:
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+
+    reloader:
+      resources:
+        limits:
+          cpu: 200m
+          memory: 200Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi
+
+  bkmonitorbeat-event:
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+    reloader:
+      resources:
+        limits:
+          cpu: 200m
+          memory: 200Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi
+    eventExporter:
+      image:
+        registry: {{ .Values.imageRegistry }}
+      resources:
+        limits:
+          cpu: 200m
+          memory: 200Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi
+  bkmonitorbeat-statefulset:
+    replicas: 1
+    resources:
+      limits:
+        cpu: "1"
+        memory: 1Gi
+      requests:
+        cpu: 50m
+        memory: 64Mi
+
+    reloader:
+      resources:
+        limits:
+          cpu: 200m
+          memory: 200Mi
+        requests:
+          cpu: 50m
+          memory: 64Mi
+
+prometheus-node-exporter:
+  image:
+    repository: {{ .Values.imageRegistry }}/blueking/node-exporter
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+kube-state-metrics:
+  image:
+    repository: {{ .Values.imageRegistry }}/coreos/kube-state-metrics

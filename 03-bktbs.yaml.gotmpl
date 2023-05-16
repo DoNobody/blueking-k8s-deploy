@@ -1,0 +1,24 @@
+bases:
+  - env.yaml
+---
+helmDefaults:
+  cleanupOnFail: false
+  wait: false
+  waitForJobs: false
+  timeout: 1800
+  createNamespace: false
+---
+## Helmfile runs various helm commands to converge the current state in the live cluster to the desired state defined here.
+releases:
+  - name: bk-tbs
+    namespace: {{ .Values.namespace | default .Values.namespace }}
+    chart: blueking/bktbs
+    missingFileHandler: Warn
+    version: {{ index .Values.version "bktbs" }}
+    # wait for k8s resources via --wait. (default false)
+    wait: false
+    # if set and --wait enabled, will wait until all Jobs have been completed before marking the release as successful. It will wait for as long as --timeout (default false, Implemented in Helm3.5)
+    waitForJobs: true
+    values:
+    - environments/default/bkci/bktbs-values.yaml.gotmpl
+    - environments/default/bkci/bktbs-custom-values.yaml.gotmpl

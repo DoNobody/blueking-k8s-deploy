@@ -1,0 +1,16 @@
+global:
+  elasticSearchSchema: "http"
+  elasticSearchHost: {{ .Values.apps.elasticsearch.host }}
+  elasticSearchPort: {{ .Values.apps.elasticsearch.port }}
+  elasticSearchUsername: {{ .Values.apps.elasticsearch.username }}
+  elasticSearchPassword: {{ .Values.apps.elasticsearch.password }}
+bkapp-filebeat:
+  image:
+    registry: {{ .Values.imageRegistry }}
+  containersLogPath: {{ .Values.apps.bkappFilebeat.containersLogPath }}
+bkapp-logstash:
+  image:
+    registry: {{ .Values.imageRegistry }}
+  appLogPrefix: {{ .Values.apps.bkappLogstash.appLogPrefix }}
+  ingressLogPrefix: {{ .Values.apps.bkappLogstash.ingressLogPrefix }}
+

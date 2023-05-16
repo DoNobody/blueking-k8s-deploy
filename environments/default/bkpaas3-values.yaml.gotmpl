@@ -1,0 +1,336 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+  bkrepoConfig:
+    adminUsername: {{ .Values.bkrepo.common.username }}
+    adminPassword: {{ .Values.bkrepo.common.password }}
+    ## svc-bkrepo 增强服务项目使用的 bkrepo 用户名/密码
+    ## 必须与增强服务中 `svc-bkrepo.plan.username` 配置项的值一样
+    addonsUsername: {{ .Values.paas.bkrepo.addonsUsername }}
+    ## 必须与增强服务中 `svc-bkrepo.plan.password` 配置项的值一样
+    addonsPassword: {{ .Values.paas.bkrepo.addonsPassword }}
+    addonsProject: bksaas-addons
+
+    ## 平台使用的 bkrepo 项目名称（要求以字母或者下划线开头，长度不超过32位）
+    bkpaas3Project: bkpaas
+    bkpaas3Username: {{ .Values.paas.bkrepo.bkpaas3Username }}
+    bkpaas3Password: {{ .Values.paas.bkrepo.bkpaas3Password }}
+
+    ## lesscode 增强服务项目使用的 bkrepo 用户名/密码（可填写任意字符）
+    lesscodeUsername: {{ .Values.paas.bkrepo.lesscodeUsername }}
+    lesscodePassword: {{ .Values.paas.bkrepo.lesscodePassword }}
+
+    endpoint: {{ .Values.bkDomainScheme }}://bkrepo.{{ .Values.domain.bkDomain }}
+    dockerRegistryAddr: "docker.{{ .Values.domain.bkDomain }}:80"
+
+  ## 蓝鲸 Oauth 服务
+  bkAuth:
+    enabled: true
+
+  # 蓝鲸域名
+  bkDomain: {{ .Values.domain.bkDomain }}
+  bkDomainScheme: {{ .Values.bkDomainScheme }}
+
+  ## 访问apigateway/esb的信息
+  appCode: "bk_paas3"
+  ## 必填，bk_paas3 对应的 bk_app_secret
+  appSecret: {{ .Values.appSecret.bk_paas3 }}
+  bkComponentApiUrl: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}"
+  bkApiUrlTmpl: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/{api_name}"
+
+  ## PaaS平台自身的trace上报endpoint配置
+  trace:
+    enabled: false
+    otlp:
+      host: 127.0.0.1
+      port: 4317
+      token: ""
+      type: grpc
+
+  ## OpenTelemetry增强服务
+  bkOtel:
+    # enabled 为 true 时才会在给应用创建 otel 增强服务实例
+    enabled: false
+    # 蓝鲸监控平台提供的 Grpc push url
+    bkOtelGrpcUrl: ""
+
+  ## 增强服务交互 Jwt Client Key
+  paasServicesJwtClientKey: "M2lTzEzUf5IWwmsM9T"
+  ## 数据库加密 secret key, 请确保每次安装之后不再变更，否则已加密的 DB 数据将无法解密
+  ## tr -dc A-Za-z0-9 </dev/urandom | head -c 32 | base64
+  bkKrillEncryptSecretKey: {{ .Values.paas.encryptKey }}
+  healthzToken: SuDA9wmvXMxiPOFvW_UztEDy
+
+# 不用内置存储
+mariadb:
+  enabled: false
+redis:
+  enabled: false
+rabbitmq:
+  enabled: false
+
+apiserver:
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110020
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  replicaCount: 1
+  celeryReplicaCount: 1
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  
+  # init-data
+  initDataJobResources:
+    limits:
+      cpu: 4
+      memory: 2048Mi
+    requests:
+      cpu: 1
+      memory: 1024Mi
+
+  celeryResources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  giteeOauth:
+    enabled: false
+    clientId: ""
+    clientSecret: ""
+  gitHubOauth:
+    enabled: false
+    clientId: ""
+    clientSecret: ""
+
+  externalDatabase:
+    default:
+      host: {{ .Values.mysql.host }}
+      port: {{ .Values.mysql.port }}
+      user: root
+      password: {{ .Values.mysql.rootPassword }}
+      name: "bkpaas3_apiserver"
+    openPaaS:
+      host: {{ .Values.mysql.host }}
+      port: 3306
+      user: root
+      password: {{ .Values.mysql.rootPassword }}
+      name: open_paas
+  externalRedis:
+    default:
+      host: {{ .Values.redis.host }}
+      port: {{ .Values.redis.port }}
+      auth: 
+        password: {{ .Values.redis.password }}
+
+  elasticSearch:
+    hosts: "[{host='{{ .Values.apps.elasticsearch.host }}', port='{{ .Values.apps.elasticsearch.port }}', http_auth='{{ .Values.apps.elasticsearch.username }}:{{ .Values.apps.elasticsearch.password }}'}]"
+    appIndex: {{ .Values.apps.bkappLogstash.appLogPrefix }}
+    ingressIndex: {{ .Values.apps.bkappLogstash.ingressLogPrefix }}
+  bkPaas3Url: "{{ .Values.bkDomainScheme }}://bkpaas.{{ .Values.domain.bkDomain }}"
+  bkPaasUrl: "{{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}"
+  bkCmdbUrl: "{{ .Values.bkDomainScheme }}://cmdb.{{ .Values.domain.bkDomain }}"
+  bkJobUrl: "{{ .Values.bkDomainScheme }}://job.{{ .Values.domain.bkDomain }}"
+  bkIamUrl: "{{ .Values.bkDomainScheme }}://bkiam.{{ .Values.domain.bkDomain }}"
+  bkIamApiUrl: "{{ .Values.bkDomainScheme }}://bkiam-api.{{ .Values.domain.bkDomain }}"
+  bkUserUrl: "{{ .Values.bkDomainScheme }}://bkuser.{{ .Values.domain.bkDomain }}"
+  bkBcsUrl: "{{ .Values.bkDomainScheme }}://bcs.{{ .Values.domain.bkDomain }}"
+  bkMonitorV3Url: "{{ .Values.bkDomainScheme }}://bkmonitor.{{ .Values.domain.bkDomain }}"
+  bkNodemanUrl: "{{ .Values.bkDomainScheme }}://bknodeman.{{ .Values.domain.bkDomain }}"
+  bkLogUrl: "{{ .Values.bkDomainScheme }}://bklog.{{ .Values.domain.bkDomain }}"
+  bkRepoUrl: "{{ .Values.bkDomainScheme }}://bkrepo.{{ .Values.domain.bkDomain }}"
+  bkCiUrl: "{{ .Values.bkDomainScheme }}://devops.{{ .Values.domain.bkDomain }}"
+  bkCodeccUrl: "{{ .Values.bkDomainScheme }}://devops.{{ .Values.domain.bkDomain }}/console/codelib"
+  bkTurboUrl: "{{ .Values.bkDomainScheme }}://devops.{{ .Values.domain.bkDomain }}/console/turbo"
+  bkPipelineUrl: "{{ .Values.bkDomainScheme }}://devops.{{ .Values.domain.bkDomain }}/console/pipeline"
+  apigwDashboardUrl: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/bk-apigateway-inner/prod/"
+  bkSsmApiUrl: "http://bkssm-web"
+  bkAuthApiUrl: "http://bkauth"
+  bkLoginApiUrl: http://bk-login-web
+  ## 蓝鲸文档中心地址，默认为官网地址，可修改为文档中心 SaaS 的地址（http://apps.{{ .Values.domain.bkDomain }}/bk--docs--center）
+  bkDocsCenterUrl: "https://bk.tencent.com/docs"
+  ## 初始化的第三方应用(外链应用)的 code,多个以英文逗号分割
+  initThirdAppCodes: "bk_repo,bk_usermgr,bk_iam,bk_bcs,bk_log_search,bk_monitorv3,bk_ci,bk_nodeman"
+
+  # 使用PyPI仓库和NPM仓库配置
+  pipIndexUrl: "https://mirrors.tencent.com/pypi/simple"
+  pipExtraIndexUrl: "https://pypi.python.org/simple"
+  npmRegistry: "https://mirrors.tencent.com/npm/"
+
+webfe:
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110020
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  bkApigwUrl: "{{ .Values.bkDomainScheme }}://apigw.{{ .Values.domain.bkDomain }}"
+  bkLessCodeUrl: "{{ .Values.bkDomainScheme }}://lesscode.{{ .Values.domain.bkDomain }}"
+  bkPaas3Url: "{{ .Values.bkDomainScheme }}://bkpaas.{{ .Values.domain.bkDomain }}"
+  bkPaasUrl: "{{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}"
+  bkLoginUrl: "{{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}/login"
+  bkDocsCenterUrl: "https://bk.tencent.com/docs"
+
+workloads:
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110020
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  saasServiceMonitor:
+    # 是否为saas应用下发ServiceMonitor
+    enabled: false
+    # 在应用集群中统一下发 ServiceMonitor 的命名空间
+    namespace: "bkmonitor-operator"
+    metricRelabelings: []
+  replicaCount: 1
+  celeryReplicaCount: 1
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  
+  celeryResources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  celeryBrokerUrl: amqp://{{ .Values.paas.rabbitmq.user }}:{{ .Values.paas.rabbitmq.password }}@{{ .Values.rabbitmq.host }}:{{ .Values.rabbitmq.port }}/{{ .Values.paas.rabbitmq.vhost }}
+
+  externalDatabase:
+    default:
+      host: {{ .Values.mysql.host }}
+      port: {{ .Values.mysql.port }}
+      user: root
+      password: {{ .Values.mysql.rootPassword }}
+      name: "bkpaas3_engine"
+  
+  externalRedis:
+    default:
+      host: {{ .Values.redis.host }}
+      port: {{ .Values.redis.port }}
+      auth:
+        password: {{ .Values.redis.password }}
+
+  initialCluster:
+    ingressConfig:
+      sub_path_domain: apps.{{ .Values.domain.bkDomain }}
+{{ readFile "./paas3_initial_cluster.yaml" | indent 4 }} 
+
+    ## 应用集群 bcs 信息，影响平台和 BCS 交互的相关功能（应用监控、告警等）
+    annotations:
+      bcsClusterID: "BCS-K8S-00000"
+      bcsProjectID: "7538606f025efa007f3e750477982c23"
+
+svc-bkrepo:
+  replicaCount: 1
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110020
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  externalDatabase:
+    default:
+      host: {{ .Values.mysql.host }}
+      password: {{ .Values.mysql.rootPassword }}
+      port: {{ .Values.mysql.port }}
+      user: "root"
+      name: "bkpaas3_svc_bkrepo"
+svc-mysql:
+  replicaCount: 1
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110020
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  resources:
+    limits:
+      cpu: 400m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  externalDatabase:
+    default:
+      host: {{ .Values.mysql.host }}
+      password: {{ .Values.mysql.rootPassword }}
+      port: {{ .Values.mysql.port }}
+      user: "root"
+      name: "bkpaas3_svc_mysql"
+  # 增强服务方案配置
+  plan:
+    # mysql实例host
+    host: {{ .Values.apps.mysql.host }}
+    # mysql实例port
+    port: {{ .Values.apps.mysql.port }}
+    # mysql管理员账号用户名
+    user: "root"
+    # mysql管理员账号密码
+    password: {{ .Values.apps.mysql.rootPassword }}
+    # 内置的授权访问权限 IP 列表
+    auth_ip_list:
+      - "%"
+
+svc-rabbitmq:
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110020
+  externalDatabase:
+    default:
+      host: {{ .Values.mysql.host }}
+      password: {{ .Values.mysql.rootPassword }}
+      port: {{ .Values.mysql.port }}
+      user: "root"
+      name: "bkpaas3_svc_rabbitmq"
+  externalRabbitMQ:
+    default:
+      host: {{ .Values.apps.rabbitmq.host }}
+      port: {{ .Values.apps.rabbitmq.amqpPort }}
+      apiPort: {{ .Values.apps.rabbitmq.managerPort }} 
+      admin: {{ .Values.apps.rabbitmq.username }}
+      password: {{ .Values.apps.rabbitmq.password }}
+      
+svc-otel:
+  # 监控平台 OTEL 服务没有部署的情况下，也建议先部署 svc-otel 增强服务
+  # 这样监控平台 OTEL 服务部署后，SaaS 只要重新部署就可以申请到 OTEL 增强服务实例了
+  enabled: true
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110020
+
+  externalDatabase:
+    default:
+      host: {{ .Values.mysql.host }}
+      password: {{ .Values.mysql.rootPassword }}
+      port: {{ .Values.mysql.port }}
+      user: "root"
+      name: "bkpaas3_svc_otel"

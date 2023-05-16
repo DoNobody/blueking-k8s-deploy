@@ -1,0 +1,19 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+service:
+  type: NodePort
+  ports:
+    client: 2181
+    tls: 3181
+    follower: 2888
+    election: 3888
+  nodePorts:
+    client: 32181
+
+persistence:
+  enabled: true
+  size: 10Gi
+          
+autopurge:
+  snapRetainCount: 3
+  purgeInterval: 8

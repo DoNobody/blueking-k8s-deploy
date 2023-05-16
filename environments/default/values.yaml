@@ -1,0 +1,278 @@
+##### Global Settings
+# 配置蓝鲸安装的namespace
+namespace: blueking
+# 配置域名，其他域名根据bkDomain拼接而成，*.bkDomain 
+domain:
+  # 配置蓝鲸的BK_DOMAIN，cookie所在domain，也是蓝鲸的访问入口
+  bkDomain: paas.example.com
+  # 配置蓝鲸的主站首页入口域名，和bkDomain默认值一样
+  bkMainSiteDomain: paas.example.com
+
+## 蓝鲸主域名访问协议http/https
+bkDomainScheme: http
+
+# 镜像地址域名
+imageRegistry: hub.bktencent.com
+
+### Platform default IngressNginx Controller
+ingressNginx:
+  hostNetwork: true
+
+### ServiceMonitor metrics
+serviceMonitor:
+  enabled: false
+
+### bklog collection
+bkLogConfig:
+  enabled: false
+  dataId: 1
+##### Global Settings ENDS
+
+### Storage Settings
+# 是否安装内置的bitnami charts的各类存储
+bitnamiMysql:
+    enabled: true
+bitnamiRedis:
+    enabled: true
+bitnamiRedisCluster:
+    enabled: true
+bitnamiMongodb:
+    enabled: true
+bitnamiElasticsearch:
+    enabled: true
+
+localpv:
+  hostDir: /mnt/blueking
+  # Retain or Delete，pvc删除时，是否清理对应pv的数据
+  reclaimPolicy: Delete
+
+mysql:
+  # 处于同一集群可以使用k8s service 名
+  host: "bk-mysql-mysql"
+  port: 3306
+  rootPassword: blueking
+  # 默认平台和saas都复用该mysql示例时，请分配大一点的磁盘空间给数据盘。
+  size: 50Gi
+
+rabbitmq:
+  host: "bk-rabbitmq"
+  # AMQP协议端口
+  port: 5672
+  username: admin
+  password: blueking
+  erlangCookie: bluekingcookie
+  size: 10Gi
+
+redis:
+  size: 10Gi
+  host: bk-redis-master
+  port: 6379
+  password: "blueking"
+
+redisCluster:
+  host: bk-redis-cluster
+  port: 6379
+  password: "8fsTmpFfVHFJ"
+
+mongodb:
+  host: bk-mongodb-headless
+  port: 27017
+  host_port: bk-mongodb-headless:27017
+  rootUsername: root
+  rootPassword: blueking
+  rsName: rs0
+  # 以下变量对部署bitnamiMongodb生效，外部mongodb服务不需要
+  replicaCount: 1
+  replicaSetKey: xEfhjshh3APP0arf
+  size: 10Gi
+
+elasticsearch:
+  # 集群内访问的k8s service
+  host: bk-elastic-elasticsearch-master.blueking.svc.cluster.local
+  # http协议的REST端口
+  port: 9200
+  username: elastic 
+  # 以下变量对部署bitnamiElasticsearch生效，外部elasticsearch服务不需要
+  password: blueking
+  size: 40Gi
+
+### Bkrepo
+bkrepo:
+  # 仓库本身占用的磁盘大小
+  size: 90Gi
+  externalMongodb:
+    username: bkrepo
+    password: bkrepo
+    database: bkrepo
+  common:
+    username: admin
+    password: blueking
+
+### PaaS
+bkauth:
+  #可以用shell命令生成随机的32位： tr -dc A-Za-z0-9 </dev/urandom | head -c 32 
+  encryptKey: kzpTcxbZcYFJ8JSfMMWeukCmduj6BPDW
+
+bkiam:
+  rabbitmq:
+    user: bkiam
+    password: bkiam
+    vhost: bkiam
+
+bkuser:
+  # 初始登录的admin账号的密码
+  initalAdminPassword: Blueking@2022
+  encryptSecretKey: VDV3UHpWUXJSWHBDeUhUV2NtTXJOSU9QNUVYdmNocFE=
+   
+bkapigateway:
+  encryptKey: cUhjQWZsYjNWYk9ReGU0SURJYkRFNE9md00yNjMxeXQ=
+
+gse:
+  # gse所在主机的网卡接口名
+  netdev: eth0
+  mongodb:
+    username: gse
+    password: gse
+    database: gse
+  zookeeper:
+    hosts: bk-zookeeper:2181
+    token: bkzk:N9m8iQR11j0K
+  cert:
+    # ce固定。其他环境对应GSE_KEYTOOL_PASS环境变量的取值
+    password: "2y#8VI2B4Sm9Dk^J"
+
+# cmdb主要配置zookeeper,mongodb的访问
+cmdb:
+  zookeeper:
+    hosts: bk-zookeeper:2181
+  mainMongodb:
+    username: cmdb
+    password: cmdb
+    database: cmdb
+  watchMongodb:
+    username: cmdb_events
+    password: cmdb_events
+    database: cmdb_events
+  migrateDataId:
+    enabled: true
+
+job:
+  cert:
+    # ce固定。其他环境对应JOB_KEYTOOL_PASS环境变量的取值
+    password: "mLnuob1**4D74c@F"
+  rabbitmq:
+    user: job
+    password: job
+    vhost: job
+  mongodb:
+    username: joblog
+    password: joblog
+    database: joblog
+  bkrepo:
+    username: bkjob
+    password: bkjob
+    project: bkjob
+
+bknodeman:
+  rabbitmq:
+    user: bknodeman
+    password: bknodeman
+    vhost: bknodeman
+  bkrepo:
+    username: bknodeman
+    password: bknodeman
+    repoName: bknodeman
+
+paas:
+  encryptKey: b2s3WHNSV0VIQklyaTk2R1VFSmlacUo4VGNMaWVVRWw=
+  rabbitmq:
+    user: bkpaas3
+    password: bkpaas3
+    vhost: bkpaas3
+  bkrepo:
+    ## svc-bkrepo 增强服务项目使用的 bkrepo 用户名/密码
+    addonsUsername: bksaas-addons
+    addonsPassword: blueking
+    ## 平台使用的 bkrepo 用户名/密码（可填写任意字符）
+    bkpaas3Username: bkpaas3
+    bkpaas3Password: blueking
+    ## lesscode 增强服务项目使用的 bkrepo 用户名/密码（可填写任意字符）
+    lesscodeUsername: bklesscode
+    lesscodePassword: blueking
+
+apps:
+  # 配置应用集群的apiserver地址、ca证书（base64）和具备cluster-admin权限的token
+  k8sInitialCluster:
+    enabled: false
+    apiServerUrl: 
+    caData: 
+    token: 
+  # 配置SaaS需要连接的mysql，如果和平台复用，注意这里所填地址的连通性
+  mysql:
+    host: "bk-mysql-mysql.blueking.svc.cluster.local"
+    port: 3306
+    rootPassword: blueking
+  rabbitmq:
+    host: "bk-rabbitmq.blueking.svc.cluster.local"
+    managerPort: 15672
+    amqpPort: 5672
+    username: admin
+    password: blueking
+  elasticsearch:
+    host: bk-elastic-elasticsearch-master.blueking.svc.cluster.local
+    port: 9200
+    username: elastic 
+    password: blueking
+  bkappFilebeat:
+    # 如果使用bcs.sh脚本部署的k8s集群，这里应该填 /data/bcs/lib/docker/containers
+    containersLogPath: /var/lib/docker/containers
+  bkappLogstash:
+    # logstash入库elasticsearch后的index前缀配置，区分以共用elasticsearch实例
+    appLogPrefix: bk_paas3_app
+    ingressLogPrefix: bk_paas3_ingress
+  ingressClassName: bk-ingress-nginx
+  ingressNginx:
+    hostNetwork: false
+
+sentry:
+  user:
+    email: admin
+    password: blueking
+  postgresql:
+    password: blueking
+    postgresqlPassword: blueking
+  redis:
+    password: blueking
+  email:
+    host: smtp.qq.com
+    port: 25
+    user: "123456@qq.com"
+    # 授权码
+    password: "123456"
+
+bkmonitor:
+  rabbitmq:
+    user: bkmonitor
+    password: bkmonitor
+    vhost: bkmonitor
+  bkrepo:
+    project: blueking
+    user: bkmonitor
+    password: bkmonitor
+    repoName: bkmonitor
+
+bklog:
+  rabbitmq:
+    user: bklog
+    password: bklog
+    vhost: bklog
+  bkrepo:
+    project: blueking
+    user: bklog
+    password: bklog
+    repoName: bklog
+  storageRootPath: /data/bklog
+
+bcs:
+  namespace: bcs-system
+  storageClass: local-storage

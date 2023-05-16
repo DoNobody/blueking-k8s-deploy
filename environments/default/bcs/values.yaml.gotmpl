@@ -1,0 +1,538 @@
+global:
+  imageRegistry: "{{ .Values.imageRegistry }}"
+  telnet:
+    repository: blueking/bcs-telnet
+    tag: "v1.21.1"
+  busybox:
+    registry: docker.io
+  pullPolicy: IfNotPresent
+  imagePullSecrets: []
+  env:
+    BK_BCS_also_log_to_stderr: "true"
+    BK_BCS_log_level: 3
+    BK_BCS_CONFIG_TYPE: "render"
+    BK_BCS_gatewayToken: ""
+    BK_BCS_clusterId: "BCS-K8S-00000"
+    BK_BCS_jwtPrivateKey: ""
+    BK_BCS_jwtPublicKey: ""
+  bkAPP:
+    systemID: "bk_bcs_app"
+    appCode: "bk_bcs_app"
+    appSecret: "{{ .Values.appSecret.bk_bcs_app }}"
+  bkIAM:
+    gateWayHost: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/bk-iam/prod"
+    iamHost: "{{ .Values.bkDomainScheme }}://bkiam-api.{{ .Values.domain.bkDomain }}"
+    bkiamHost: "{{ .Values.bkDomainScheme }}://{{ .Values.domain.bkDomain }}"
+    iamApplyAddress: "{{ .Values.bkDomainScheme }}://bkiam.{{ .Values.domain.bkDomain }}"
+  bkAPIGW:
+    bcs-app:
+      bkApigatewayPublicKey: "{{ index .Values.builtinGateway "bcs-app" "publicKeyBase64"  }}"
+    bcs-api-gateway:
+      bkApigatewayPublicKey: "{{ index .Values.builtinGateway "bcs-api-gateway" "publicKeyBase64"  }}"
+  storage:
+    etcd:
+      endpoints: []
+    mongodb:
+      endpoint: ""
+      username: ""
+      # password: ""
+    messageQueue:
+      enabled: true
+      kind: "rabbitmq"
+      endpoint: ""
+      username: "bcs"
+      # password: ""
+  secret:
+    autoGenerate: true
+    bcsCerts: "bk-bcs-certs"
+    etcdCerts: "bcs-etcd-certs"
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  storageClass: {{ .Values.bcs.storageClass }}
+  hostAliases: []
+  assemblyInstall: true
+  bkLog:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    stdoutLogDataID: 1110027
+    containerLogDataID: 1110028
+
+ingress:
+  enabled: true
+  ingressClassName: ""
+  hostname: bcs-api.{{ .Values.domain.bkDomain }}
+  path: /
+  pathType: Prefix
+
+bcs-api-gateway:
+  enabled: true
+  replicaCount: 1
+  env:
+    # cert file for apigateway
+    BK_BCS_apiGatewayCertFilename: "bk_bcs.pem"
+    # key file for apigateway
+    BK_BCS_apiGatewayKeyFilename: "bk_bcs.key"
+    # apisix ssl sni, match your ssl certificates, default is *.example.com
+    BK_BCS_ingressHostPattern: "*.{{ .Values.domain.bkDomain }}"
+    # admin token for api gateway
+    BK_BCS_bkLoginHost: "{{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}/login"
+  migration:
+    bcs-api-gateway:
+      BK_API_URL_TMPL: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/{api_name}
+      BK_APIGW_MANAGERS: ""
+    bcs-app:
+      BK_API_URL_TMPL: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/{api_name}
+      BK_APIGW_MANAGERS: ""
+bcs-cluster-manager:
+  enabled: true
+  replicaCount: 1
+  migration:
+    enabled: true
+    repository: alpine/k8s
+    tag: "1.20.7"
+  env:
+    # bcsSops options
+    bcsBkUserName: "admin"
+    bcsCreateTaskURL: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/c/compapi/v2/sops/create_task/"
+    bcsTaskStatusURL: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/c/compapi/v2/sops/get_task_status/"
+    bcsStartTaskURL: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/c/compapi/v2/sops/start_task/"
+    # cmdb options
+    bcsCmdbServer: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}"
+    # perm options
+    bcsSsmEnable: "true"
+    bcsSsmServer: "http://bkssm-web.{{ .Values.namespace }}"
+    # bcs-cc config
+    bcsPassServer: "http://bcs-ui-cc:5000"
+    # use-manager config
+    bcsUserEnable: true
+    bcsUserVerifyTLS: true
+    # bcs app config
+    bcsAppServer: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/bcs-app/prod"
+    bcsAppBkUsername: "admin"
+    bcsAppDebug: false
+    bcsStorageServer: "https://bcs-api.{{ .Values.domain.bkDomain }}:31024"
+  bcsAPIGateway:
+    host: "{{ .Values.bkDomainScheme }}://bcs-api.{{ .Values.domain.bkDomain }}"
+  bcsAPP:
+    systemID: "bk_bcs_app"
+    appCode: "bk_bcs_app"
+    appSecret: "{{ .Values.appSecret.bk_bcs_app }}"
+  cloudConfig:
+    platform:
+      image_registry: "{{ .Values.imageRegistry }}"
+      bcs_api_host: bcs-api.{{ .Values.domain.bkDomain }}
+      bkrepo_helm_url: https://hub.bktencent.com/chartrepo/blueking
+      bcs_agent_chart_version: {{ index .Values.version "bcs-services-stack" }}
+      bcs_namespace: {{ .Values.bcs.namespace }}
+    blueking:
+      sopsURL: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/c/compapi/v2/sops/create_task/
+      createClusterTplID: 10001
+      deleteClusterTplID: 10003
+      addNodesToClusterTplID: 10001
+      deleteNodesFromClusterTplID: 10002
+      clusterVersion: v1.20.11
+bcs-storage:
+  enabled: true
+  replicaCount: 1
+bcs-user-manager:
+  enabled: true
+  replicaCount: 1
+  mysql:
+    enabled: true
+    auth:
+      database: "bcs"
+      username: "bcs"
+      password: "bcstest123456"
+    primary:
+      configuration: |-
+        [mysqld]
+        default_authentication_plugin=mysql_native_password
+        skip-name-resolve
+        explicit_defaults_for_timestamp
+        basedir=/opt/bitnami/mysql
+        plugin_dir=/opt/bitnami/mysql/lib/plugin
+        port=3306
+        socket=/opt/bitnami/mysql/tmp/mysql.sock
+        datadir=/bitnami/mysql/data
+        tmpdir=/opt/bitnami/mysql/tmp
+        max_allowed_packet=16M
+        bind-address=0.0.0.0
+        pid-file=/opt/bitnami/mysql/tmp/mysqld.pid
+        log-error=/opt/bitnami/mysql/logs/mysqld.log
+        character-set-server=UTF8
+        collation-server=utf8_general_ci
+
+        [client]
+        port=3306
+        socket=/opt/bitnami/mysql/tmp/mysql.sock
+        default-character-set=UTF8
+        plugin_dir=/opt/bitnami/mysql/lib/plugin
+
+        [manager]
+        port=3306
+        socket=/opt/bitnami/mysql/tmp/mysql.sock
+      persistence:
+        enabled: true
+        size: 20Gi
+rabbitmq:
+  persistence:
+    enabled: true
+    size: 10Gi
+etcd:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 10Gi
+mongodb:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 20Gi
+cert-manager:
+  enabled: true
+  cainjector:
+    image:
+      registry: {{ .Values.imageRegistry }}
+  image:
+    registry: {{ .Values.imageRegistry }}
+  webhook:
+    image:
+      registry: {{ .Values.imageRegistry }}
+bcs-k8s-stack:
+  enabled: true
+  global:
+    env:
+      BK_BCS_clusterId: BCS-K8S-00000
+  bcs-k8s-watch:
+    enabled: true
+  bcs-kube-agent:
+    enabled: true
+    args:
+      BK_BCS_kubeAgentProxy: "https://kubernetes.default.svc.cluster.local:443"
+bcs-ui:
+  ## 是否启用 bcs-ui
+  enabled: true
+  ## DB 配置
+  mariadb:
+    enabled: true
+    nameOverride: "mariadb"
+    architecture: standalone
+    auth:
+      username: "bcs-ui"
+      password: "blueking"
+      rootPassword: "blueking"
+    primary:
+      service:
+        port: 3306
+      persistence:
+        enabled: true
+        storageClass: {{ .Values.bcs.storageClass }}
+        accessModes:
+          - ReadWriteOnce
+        size: 10Gi
+    initdbScriptsConfigMap: "bcs-ui-init-sql"
+  externalDatabase:
+    ## bcs-app 数据库
+    app:
+      name: "bcs-app"
+      host: ""
+      port: 3306
+      user: "bcs-ui"
+      password: ""
+    ## bcs-cc 数据库
+    cc:
+      name: "bcs-cc"
+      host: ""
+      port: 3306
+      user: "bcs-ui"
+      password: ""
+  ## Redis 配置
+  redis:
+    enabled: true
+    nameOverride: "redis"
+    architecture: standalone
+    replica:
+      replicaCount: 1
+    auth:
+      password: "blueking"
+    master:
+      service:
+        port: 6379
+      persistence:
+        enabled: true
+        storageClass: {{ .Values.bcs.storageClass }}
+        accessModes:
+          - ReadWriteOnce
+        size: 10Gi
+      repository: bitnami/redis
+  externalRedis:
+    ## 默认 Redis 连接信息
+    default:
+      host: ""
+      port: 6379
+      password: ""
+      db: 0
+  ## 容器服务 UI 应用
+  app:
+    ## 是否启用服务
+    enabled: true
+    ## 资源名称
+    nameOverride: app
+    fullnameOverride: ""
+    ## 副本数量
+    replicaCount: 1
+    bkRepo:
+      accessKey: "bk_bcs_app"
+      secretKey: "{{ .Values.appSecret.bk_bcs_app }}"
+    ## 环境变量（需要用户修改的）
+    envs:
+      ## APP_ID 固定为 bk_bcs_app
+      ## APP SECRET 需要通过开发者中心查询
+      BKPAAS_APP_SECRET: "{{ .Values.appSecret.bk_bcs_app }}"
+      ## PaaS 主入口链接 (页面) (Login)
+      BK_PAAS_URL: "{{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}"
+      ## APIGW & ESB 服务
+      BK_APIGW_URL: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}"
+      bkApiUrlTmpl: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/{api_name}"
+      ## IAM 主页面链接 (页面)
+      BKAPP_IAM_APP_URL: {{ .Values.bkDomainScheme }}://bkiam.{{ .Values.domain.bkDomain }}
+      ## IAM 服务
+      BKAPP_IAM_URL: {{ .Values.bkDomainScheme }}://bkiam-api.{{ .Values.domain.bkDomain }}
+      ## SSM 服务
+      BKAPP_SSM_URL: "http://bkssm-web.{{ .Values.namespace }}"
+      ## Bcs UI API
+      BKAPP_BCS_UI_API_URL: "{{ .Values.bkDomainScheme }}://bcs.{{ .Values.domain.bkDomain }}"
+      ## Bcs UI 主页链接 (页面)
+      BKAPP_BCS_UI_URL: "{{ .Values.bkDomainScheme }}://bcs.{{ .Values.domain.bkDomain }}"
+      ## 镜像服务地址
+      BKAPP_ARTIFACTORY_ADDR: ""
+      ## Prod 环境日志输出等级，默认为 ERROR
+      PROD_LOG_LEVEL: "INFO"
+      ## 蓝鲸监控服务
+      BKAPP_BKMONITOR_URL: "{{ .Values.bkDomainScheme }}://bkmonitor.{{ .Values.domain.bkDomain }}"
+      ## 蓝鲸日志平台服务
+      BKAPP_BKLOG_URL: "{{ .Values.bkDomainScheme }}://bklog.{{ .Values.domain.bkDomain }}"
+      ## 特殊指定的 web-console 镜像配置
+      WEB_CONSOLE_KUBECTLD_IMAGE: "{{ .Values.imageRegistry }}/blueking/bcs-kubectld"
+      ## 以下环境变量建议使用默认值
+      ## APP ID 不可修改
+      BKPAAS_APP_ID: bk_bcs_app
+      ## 项目根域名 (Session)
+      ROOT_DOMAIN: {{ .Values.domain.bkDomain }}
+      ## 指定的 Django 配置文件
+      DJANGO_SETTINGS_MODULE: backend.settings.helm.prod
+      ## PaaSCC 服务（同集群部署）
+      BKAPP_CC_URL: http://bcs-ui-cc:5000
+      ## PaaS 运行环境
+      BKPAAS_ENVIRONMENT: prod
+      ## 默认 k8s 版本
+      BKAPP_K8S_VERSION: v1.12.3
+      ## 最新版本不再支持 Mesos 集群
+      BKAPP_SUPPORT_MESOS: "false"
+      ## 蓝鲸监控 unify-query 地址
+      BKAPP_BK_MONITOR_QUERY_URL: http://bk-monitor-unify-query-http.{{ .Values.namespace }}:10205
+      ## BCS API GATEWAY域名
+      BCS_APIGW_PROD_DOMAIN: https://bcs-api-gateway
+      BCS_API_HOST: {{ .Values.bkDomainScheme }}://bcs-api.{{ .Values.domain.bkDomain }}
+      ## 蓝鲸制品库配置
+      BK_REPO_DOMAIN: "{{ .Values.bkDomainScheme }}://bkrepo.{{ .Values.domain.bkDomain }}"
+      DOCKER_REPO_DOMAIN: "{{ .Values.bkDomainScheme }}://docker.{{ .Values.domain.bkDomain }}"
+      HELM_REPO_DOMAIN: "{{ .Values.bkDomainScheme }}://helm.{{ .Values.domain.bkDomain }}"
+      CLUSTER_TOOLS_REPO_PREFIX: "https://hub.bktencent.com/chartrepo/blueking/charts"
+    ## DB, Redis 配置由父 Chart 指定
+    envFrom:
+      - configMapRef:
+          name: bcs-app-db-env
+      - configMapRef:
+          name: bcs-app-redis-env
+    ## 扩缩容配置
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    ## 网络配置类
+    ingress:
+      enabled: true
+      ingressClassName: ""
+      rules:
+        - host: bcs.{{ .Values.domain.bkDomain }}
+          paths:
+            - path: /ws/
+              portNumber: 28801
+            - path: /web_console/
+              portNumber: 28800
+            - path: /
+              portNumber: 28000
+      tls: []
+    service:
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 28000
+          targetPort: 28000
+          protocol: TCP
+        - name: web-console
+          port: 28800
+          targetPort: 28800
+          protocol: TCP
+        - name: ws-channel
+          port: 28801
+          targetPort: 28801
+          protocol: TCP
+    ## 权限控制类
+    serviceAccount:
+      create: true
+      name: bcs-app
+    ## 安全性上下文
+    securityContext: {}
+    ## 指标，监控等
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: {{ .Values.serviceMonitor.enabled }}
+        interval: 30s
+        scrapeTimeout: ""
+    ## 蓝鲸日志采集
+    bkLogCollection:
+      enabled: {{ .Values.bkLogConfig.enabled }}
+      dataId: 1110030
+  ## PaaSCC 应用
+  cc:
+    ## 是否启用服务
+    enabled: true
+    ## 资源名称
+    nameOverride: cc
+    fullnameOverride: ""
+    ## 副本数量
+    replicaCount: 1
+    envs:
+      ## code, secret 与 app 模块配置相同
+      appCode: "bk_bcs_app"
+      appSecret: "{{ .Values.appSecret.bk_bcs_app }}"
+      ## SSM 鉴权服务 API
+      ssmUrl: "http://bkssm-web.{{ .Values.namespace }}"
+    envFrom:
+      - configMapRef:
+          name: bcs-cc-db-env
+    ## 扩缩容配置
+    autoscaling:
+      enabled: false
+      minReplicas: 1
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    ## 网络配置类
+    ingress:
+      enabled: true
+      ingressClassName: ""
+      rules:
+        - host: bcs-cc.{{ .Values.domain.bkDomain }}
+          paths:
+            - path: /
+              portNumber: 5000
+      tls: []
+    ## 权限控制类
+    serviceAccount:
+      create: true
+      name: bcs-cc
+    ## 安全性上下文
+    securityContext: {}
+    ## 蓝鲸日志采集
+    bkLogCollection:
+      enabled: {{ .Values.bkLogConfig.enabled }}
+      dataId: 1110029
+bcs-webconsole:
+  enabled: true
+  config:
+    base_conf:
+      app_code: bk_bcs_app
+      app_secret: {{ .Values.appSecret.bk_bcs_app }}
+      bk_paas_host: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkDomain }}
+    auth_conf:
+      host: {{ .Values.bkDomainScheme }}://bkiam-api.{{ .Values.domain.bkDomain }}
+      ssm_host: http://bkssm-web.{{ .Values.namespace }}
+    bcs_conf:
+      host: http://bcs-api-gateway
+      jwt_public_key: ""
+      token: ""
+    bcs_env_conf:
+      - cluster_env: prod
+        host: http://bcs-api-gateway
+        token: ""
+    etcd:
+      endpoints: bcs-etcd:2379
+    redis:
+      host: bcs-services-stack-redis-master
+      password: blueking
+      port: 6379
+      db: 1
+    web:
+      host: http://bcs-api.{{ .Values.domain.bkDomain }}
+    webconsole:
+      kubectld_image: "{{ .Values.imageRegistry }}/blueking/bcs-kubectld"
+      kubectld_tags: ["1.20.12"]
+
+bcs-monitor:
+  # 是否开启
+  enabled: true
+  # api 模块独立配置
+  api:
+    replicaCount: 1
+  # query 模块独立配置
+  query:
+    replicaCount: 1
+  # storegw 模块独立配置
+  storegw:
+    replicaCount: 1
+  # 蓝鲸App凭证配置
+  config_credentials:
+    credentials:
+      - credential_type: app_code
+        credential: bk_apigw_test # 蓝鲸网关测试code
+        enabled: true
+        scopes:
+          - project_code: RE_.*
+  # 管理员凭证配置
+  config_credentials_manager:
+    credentials: []
+  # webconsole 配置
+  config:
+    base_conf:
+      app_code: bk_bcs_app
+      app_secret: {{ .Values.appSecret.bk_bcs_app }}
+      bk_paas_host: http://{{ .Values.appSecret.bk_bcs_app }}
+      language_code: zh-hans
+      time_zone: Asia/Shanghai
+      run_env: dev
+    logging:
+      file: ""
+      level: info
+      stderr: true
+    bcs_conf:
+      host: http://bcs-api-gateway
+      jwt_public_key: ""
+      token: ""
+    bcs_env_conf:
+      - cluster_env: prod
+        host: http://bcs-api-gateway
+        token: ""
+    etcd:
+      endpoints: bcs-etcd:2379
+    redis:
+      host: bcs-services-stack-redis-master
+      password: blueking
+      port: 6379
+      db: 1
+    web:
+      host: http://bcs-api.{{ .Values.domain.bkDomain }}
+      route_prefix: /bcsapi/v4/monitor
+    storegw:
+      - type: BK_MONITOR
+        config:
+          metadata_url: http://bk-monitor-unify-query-http.{{ .Values.namespace }}.svc.cluster.local:10205 # fake url
+          url: http://bk-monitor-unify-query-http.{{ .Values.namespace }}.svc.cluster.local:10205
+bcs-cluster-resources:
+  enabled: false
+bcs-project-manager:
+  enabled: false

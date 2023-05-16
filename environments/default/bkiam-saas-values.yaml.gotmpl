@@ -1,0 +1,77 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+replicaCount: 1
+nameOverride: "bkiam-saas"
+fullnameOverride: "bkiam-saas"
+resources:
+  limits:
+    cpu: 1000m
+    memory: 2048Mi
+  requests:
+    memory: 128Mi
+    cpu: 100m
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  dataId: 1110013
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+ingress:
+  enabled: true
+  hostname: bkiam.{{ .Values.domain.bkDomain }}
+
+redis:
+  enabled: false
+externalRedis:
+  default:
+    host: {{ .Values.redis.host }}
+    port: {{ .Values.redis.port }}
+    password: {{ .Values.redis.password }}
+mariadb:
+  enabled: false
+externalDatabase:
+  default:
+    host: {{ .Values.mysql.host }}
+    port: {{ .Values.mysql.port }}
+    user: root
+    password: {{ .Values.mysql.rootPassword }}
+    database: bkiam_saas
+
+externalRabbitmq:
+  default:
+    enabled: true
+    host: bk-rabbitmq
+    port: 5672
+    username: {{ .Values.bkiam.rabbitmq.user }}
+    password: {{ .Values.bkiam.rabbitmq.password }}
+    vhost: {{ .Values.bkiam.rabbitmq.vhost }}
+
+appCode: bk_iam
+appSecret: {{ .Values.appSecret.bk_iam }}
+
+## bkiam 后端 url
+bkIamBackendUrl: http://bkiam-web
+
+## bkiam search engine url:　use bkiam search engine url or apigateway bkiam search engine url
+bkIamSearchEngineUrl: http://bkiam-search-engine
+
+## bkiam search engine request type: direct OR apigateway
+bkIamSearchEngineType: "direct"
+
+## 蓝鲸 ESB url
+bkComponentApiUrl: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸 Apigateway Template url
+bkApiUrlTmpl: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/{api_name}"
+
+## 蓝鲸 PaaS url
+bkPaasUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}
+
+## 蓝鲸 Login url
+bkLoginUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}/login/
+
+## 蓝鲸 ITSM url
+bkItsmUrl: {{ .Values.bkDomainScheme }}://apps.{{ .Values.domain.bkDomain }}/bk--itsm/
+
+## 接入apigateway分配的publicKey
+bkApigatewayPublicKey: {{ index .Values.builtinGateway "bk-iam" "publicKeyBase64"  }}
+

@@ -1,0 +1,21 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+## Helmfile runs various helm commands to converge the current state in the live cluster to the desired state defined here.
+releases:
+  - name: bk-ci
+    namespace: {{ .Values.namespace | default .Values.namespace }}
+    chart: blueking/bk-ci
+    missingFileHandler: Warn
+    version: {{ index .Values.version "bk-ci" }}
+    # wait for k8s resources via --wait. (default false)
+    wait: false
+    # if set and --wait enabled, will wait until all Jobs have been completed before marking the release as successful. It will wait for as long as --timeout (default false, Implemented in Helm3.5)
+    waitForJobs: true
+    values:
+    - environments/default/bkci/bkci-values.yaml.gotmpl
+    - environments/default/bkci/bkci-resources.yaml.gotmpl
+    - environments/default/bkci/bkci-custom-values.yaml.gotmpl

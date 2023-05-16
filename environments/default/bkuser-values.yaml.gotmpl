@@ -1,0 +1,151 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+  bkDomain: {{ .Values.domain.bkDomain }}
+  bkDomainScheme: {{ .Values.bkDomainScheme }}
+  enableIAM: true
+  enableApiAuth: true
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110016
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+
+mariadb:
+  enabled: false
+redis:
+  enabled: false
+login:
+  enabled: true
+  bkPaasSerectKey: {{ .Values.appSecret.bk_paas }}
+  bkPaas3Addr: bkpaas.{{ .Values.domain.bkDomain }}
+  encryptSecretKey: {{ .Values.bkuser.encryptSecretKey }}
+  ## 蓝鲸 PaaS url（浏览器访问蓝鲸入口）
+  bkPaasUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}
+  ## 蓝鲸 ESB/APIGATEWAY url，注意集群内外都是统一域名。集群内可以配置域名解析到内网ip
+  bkComponentApiUrl: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}
+  ## 蓝鲸 Login url（浏览器跳转登录用的URL前缀）
+  bkLoginUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}/login/
+  bkLoginAddr: {{ .Values.domain.bkMainSiteDomain }}
+  ## 蓝鲸登录后台的内部服务地址（一般用于校验登录token）
+  bkLoginApiUrl: http://bk-login-web
+  # Login API Auth Enabled 登录是否开启了 API 认证
+  bkLoginApiAuthEnabled : true
+  ## 蓝鲸用户管理 SaaS地址
+  bkUserUrl: {{ .Values.bkDomainScheme }}://bkuser.{{ .Values.domain.bkDomain }}
+  bkUserAddr: bkuser.{{ .Values.domain.bkDomain }}
+  ## 蓝鲸用户管理后台 API 地址
+  bkUserApiUrl: http://bkuserapi-web
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2048Mi
+    requests:
+      cpu: 200m
+      memory: 128Mi
+  
+  externalDatabase:
+    default:
+        host: {{ .Values.mysql.host }}
+        port: {{ .Values.mysql.port }}
+        password: {{ .Values.mysql.rootPassword }}
+        user: root
+        name: "bk_login"
+api:
+  enabeld: true
+  bkApiUrlTmpl: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/{api_name}"
+  bkApigatewayPublicKey: {{ index .Values.builtinGateway "bk-user" "publicKeyBase64"  }}
+  ## web deployment 副本数
+  replicaCount: 1
+  ## celery deployment 副本数
+  celeryReplicaCount: 1
+  appCode: bk_usermgr
+  appSecret: {{ .Values.appSecret.bk_usermgr }}
+  initialAdminUsername: "admin"
+  initialAdminPassword: {{ .Values.bkuser.initalAdminPassword }}
+  ## 蓝鲸 PaaS url（浏览器访问蓝鲸入口）
+  bkPaasUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}
+  ## 蓝鲸 ESB/APIGATEWAY url，注意集群内外都是统一域名。集群内可以配置域名解析到内网ip
+  bkComponentApiUrl: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}
+  ## 蓝鲸 Login url（浏览器跳转登录用的URL前缀）
+  bkLoginUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}/login/
+  ## 蓝鲸登录后台的内部服务地址（一般用于校验登录token）
+  bkLoginApiUrl: http://bk-login-web
+  ## 蓝鲸用户管理 SaaS地址
+  bkUserUrl: {{ .Values.bkDomainScheme }}://bkuser.{{ .Values.domain.bkDomain }}
+  bkUserAddr: bkuser.{{ .Values.domain.bkDomain }}
+  ## 蓝鲸用户管理后台 API 地址
+  bkUserApiUrl: http://bkuserapi-web
+  ## 蓝鲸权限中心 SaaS 地址
+  bkIamUrl: {{ .Values.bkDomainScheme }}://bkiam.{{ .Values.domain.bkDomain }}
+  ## 蓝鲸权限中心后台 API 地址
+  bkIamApiUrl: http://bkiam-web
+  resources:
+    web:
+      requests:
+        cpu: "500m"
+        memory: "128Mi"
+      limits:
+        cpu: "2000m"
+        memory: "2048Mi"
+    worker:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "2000m"
+        memory: "1024Mi"
+    beat:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "2000m"
+        memory: "1024Mi"
+  externalDatabase:
+    default:
+        host: {{ .Values.mysql.host }}
+        port: {{ .Values.mysql.port }}
+        password: {{ .Values.mysql.rootPassword }}
+        user: root
+        name: "bk_user_api"
+  externalRedis:
+    default:
+      host: {{ .Values.redis.host }}
+      port: {{ .Values.redis.port }}
+      password: {{ .Values.redis.password }}
+
+saas:
+  ## web deployment 副本数
+  replicaCount: 1
+  ## celery deployment 副本数
+  celeryReplicaCount: 1
+  appCode: "bk_usermgr"
+  appSecret: {{ .Values.appSecret.bk_usermgr }}
+  ## 蓝鲸 PaaS url（浏览器访问蓝鲸入口）
+  bkPaasUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}
+  ## 蓝鲸 ESB/APIGATEWAY url，注意集群内外都是统一域名。集群内可以配置域名解析到内网ip
+  bkComponentApiUrl: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}
+  ## 蓝鲸 Login url（浏览器跳转登录用的URL前缀）
+  bkLoginUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}/login/
+  ## 蓝鲸登录后台的内部服务地址（一般用于校验登录token）
+  bkLoginApiUrl: http://bk-login-web
+  ## 蓝鲸用户管理 SaaS地址
+  bkUserUrl: {{ .Values.bkDomainScheme }}://bkuser.{{ .Values.domain.bkDomain }}
+  bkUserAddr: bkuser.{{ .Values.domain.bkDomain }}
+  ## 蓝鲸用户管理后台 API 地址
+  bkUserApiUrl: http://bkuserapi-web
+  resources:
+    limits:
+      cpu: 1000m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  
+  externalDatabase:
+    default:
+        host: {{ .Values.mysql.host }}
+        port: {{ .Values.mysql.port }}
+        password: {{ .Values.mysql.rootPassword }}
+        user: root
+        name: "bk_user_saas"

@@ -1,0 +1,78 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+commonLabels:
+  tier: storage
+
+releases:
+  - name: bk-mysql
+    namespace: {{ .Values.namespace }}
+    # Mysql chart files/create_database.sql contains CREATE DATABASE for all blueking databases
+    chart: ./charts/mysql-{{ .Values.version.mysql }}.tgz
+    missingFileHandler: Warn
+    version: {{ .Values.version.mysql }}
+    condition: bitnamiMysql.enabled
+    values:
+    - ./environments/default/mysql-values.yaml.gotmpl
+    - ./environments/default/mysql-custom-values.yaml.gotmpl
+
+  - name: bk-rabbitmq
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/rabbitmq-{{ .Values.version.rabbitmq }}.tgz
+    missingFileHandler: Warn
+    version: {{ .Values.version.rabbitmq }}
+    values:
+    - ./environments/default/rabbitmq-values.yaml.gotmpl
+    - ./environments/default/rabbitmq-custom-values.yaml.gotmpl
+
+  - name: bk-redis
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/redis-{{ .Values.version.redis }}.tgz
+    version: {{ .Values.version.redis }}
+    condition: bitnamiRedis.enabled
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/redis-values.yaml.gotmpl 
+    - ./environments/default/redis-custom-values.yaml.gotmpl 
+
+  - name: bk-redis-cluster
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/redis-cluster-{{ index .Values.version "redis-cluster" }}.tgz
+    version: {{ index .Values.version "redis-cluster" }}
+    condition: bitnamiRedisCluster.enabled
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/redis-cluster-values.yaml.gotmpl 
+    - ./environments/default/redis-cluster-custom-values.yaml.gotmpl 
+
+  - name: bk-mongodb
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/mongodb-{{ .Values.version.mongodb }}.tgz
+    missingFileHandler: Warn
+    version: {{ .Values.version.mongodb }}
+    condition: bitnamiMongodb.enabled
+    values:
+    - ./environments/default/mongodb-values.yaml.gotmpl
+    - ./environments/default/mongodb-custom-values.yaml.gotmpl
+
+  - name: bk-elastic
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/elasticsearch-{{ .Values.version.elasticsearch }}.tgz
+    missingFileHandler: Warn
+    version: {{ .Values.version.elasticsearch }}
+    condition: bitnamiElasticsearch.enabled
+    values:
+    - ./environments/default/elasticsearch-values.yaml.gotmpl
+    - ./environments/default/elasticsearch-custom-values.yaml.gotmpl
+
+  - name: bk-zookeeper
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/zookeeper-{{ .Values.version.zookeeper }}.tgz
+    version: {{ .Values.version.zookeeper }}
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/zookeeper-values.yaml.gotmpl
+    - ./environments/default/zookeeper-custom-values.yaml.gotmpl

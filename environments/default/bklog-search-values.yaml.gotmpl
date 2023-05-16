@@ -1,0 +1,196 @@
+global:
+  # 全局镜像仓库
+  imageRegistry: {{ .Values.imageRegistry }}
+  # 公共域名
+  bkDomain: {{ .Values.domain.bkDomain }}
+
+image:
+  registry: {{ .Values.imageRegistry }}
+
+# 蓝鲸日志平台采集
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  dataId: 1110026
+
+# 蓝鲸监控指标采集
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+# 监控公共配置
+configs:
+  bkPaasHost: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}
+  appCode: "bk_log_search"
+  appSecret: {{ .Values.appSecret.bk_log_search }}
+  bkComponentApiUrl: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}
+  # 权限中心地址
+  bkIamSystemId: "bk_log_search"
+  bkIamInnerHost: "http://bkiam-web"
+
+  # 容器日志相关
+  bkSsmApiUrl: "http://bkssm-web"
+  bkBcsApiUrl: "http://bcs-api-gateway.bcs-system.svc.cluster.local"
+  bkBcsCcApiUrl: "http://bcs-ui-cc.bcs-system.svc.cluster.local:5000"
+  bcsApiGatewayToken: "need to change"
+  bcsCcSsmSwitch: "on"
+
+  # 第三方APP外部访问地址
+  # 文档中心地址
+  bkDocsUrl: https://bk.tencent.com/docs/
+  # 监控web访问地址
+  bkMonitorUrl: {{ .Values.bkDomainScheme }}://bkmonitor.{{ .Values.domain.bkDomain }}
+  # 计算平台地址
+  bkDataUrl: ""
+  useBkRepo: true
+  bkRepoUrl: {{ .Values.bkDomainScheme }}://bkrepo.{{ .Values.domain.bkDomain }}
+  bkRepoUser: {{ .Values.bklog.bkrepo.user }}
+  bkRepoPassword: {{ .Values.bklog.bkrepo.password }}
+  bkRepoProject: {{ .Values.bklog.bkrepo.project }}
+  bkRepoBucket: {{ .Values.bklog.bkrepo.repoName }}
+  storageRootPath: {{ .Values.bklog.storageRootPath }}
+
+ingress:
+  enabled: true
+  hostname: bklog.{{ .Values.domain.bkDomain }}
+# 进程配置
+web:
+  replicaCount: 1
+  service:
+    type: ClusterIP
+    port: 80
+api:
+  replicaCount: 1
+webWorker:
+  replicaCount: 1
+webBeat:
+  replicaCount: 1
+asyncWorker:
+  replicaCount: 1
+oworker:
+  replicaCount: 1
+pworker:
+  replicaCount: 1
+sworker:
+  replicaCount: 1
+
+# grafana配置
+# 配置可以参考 https://github.com/bitnami/charts/tree/master/bitnami/grafana
+# 镜像继承自 bitnami/grafana，加入了监控的数据源及内置panels
+grafana:
+  enabled: true
+  admin:
+    user: admin
+    password: admin
+  grafana:
+    extraEnvVars:
+      - name: BKPAAS_SUB_PATH
+        value: "/"
+      - name: PORT
+        value: "3000"
+      - name: DB_USERNAME
+        value: "root"
+      - name: DB_PASSWORD
+        value: {{ .Values.mysql.rootPassword }}
+      - name: DB_HOST
+        value: {{ .Values.mysql.host }}
+      - name: DB_PORT
+        value: "{{ .Values.mysql.port }}"
+      - name: DB_NAME
+        value: "bklog_grafana"
+      - name: GF_PATHS_PLUGINS
+        value: "/opt/bitnami/grafana/plugins"
+
+# mysql 配置
+db:
+  name: "bk_log_search"
+  username: "root"
+  password: {{ .Values.mysql.rootPassword }}
+  host: {{ .Values.mysql.host }}
+  port: {{ .Values.mysql.port }}
+
+# rabbitmq配置
+rabbitmq:
+  host: bk-rabbitmq
+  port: 5672
+  vhost: {{ .Values.bklog.rabbitmq.vhost }}
+  user: {{ .Values.bklog.rabbitmq.user }}
+  password: {{ .Values.bklog.rabbitmq.password }}
+
+# redis配置
+redis:
+  mode: "single"
+  host: {{ .Values.redis.host }}
+  port: {{ .Values.redis.port }}
+  password: {{ .Values.redis.password }}
+
+# 平台内置采集项
+platBuiltInCollect:  # list形式
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  filePath: /app/code/builtin_collect.yaml
+  config:
+  - dataId: 1110001
+    moduleName: bkapigateway_esb_container
+  - dataId: 1110002
+    moduleName: bkapigateway_esb_stdout
+  - dataId: 1110003
+    moduleName: bkapigateway_apigateway_container
+  - dataId: 1110004
+    moduleName: bkapigateway_apigateway_stdout
+  - dataId: 1110005
+    moduleName: bkapigateway_apisupport_stdout
+  - dataId: 1110006
+    moduleName: bkapigateway_dashboard_stdout
+  - dataId: 1110007
+    moduleName: bkrepo_service
+  - dataId: 1110008
+    moduleName: bkrepo_gateway_access
+  - dataId: 1110009
+    moduleName: bkrepo_gateway_error
+  - dataId: 1110010
+    moduleName: bkauth
+  - dataId: 1110011
+    moduleName: bkssm
+  - dataId: 1110012
+    moduleName: bkiam
+  - dataId: 1110013
+    moduleName: bkiam_saas
+  - dataId: 1110014
+    moduleName: bkiam_search_engine
+  - dataId: 1110015
+    moduleName: bkconsole
+  - dataId: 1110016
+    moduleName: bkuser
+  - dataId: 1110017
+    moduleName: bkgse
+  - dataId: 1110018
+    moduleName: bkcmdb_container
+  - dataId: 1110019
+    moduleName: bkcmdb_stdout
+  - dataId: 1110020
+    moduleName: bkpaas3
+  - dataId: 1110021
+    moduleName: bkmonitor
+  - dataId: 1110022
+    moduleName: bktransfer
+  - dataId: 1110023
+    moduleName: bkunify_query
+  - dataId: 1110024
+    moduleName: bkinfluxdb_proxy
+  - dataId: 1110025
+    moduleName: bkingester
+  - dataId: 1110026
+    moduleName: bklogsearch
+  - dataId: 1110027
+    moduleName: bcs_service_stdout
+  - dataId: 1110028
+    moduleName: bcs_service_container
+  - dataId: 1110029
+    moduleName: bcs_ui_cc
+  - dataId: 1110030
+    moduleName: bcs_ui_app
+  - dataId: 1110031
+    moduleName: bknodeman
+  - dataId: 1110032
+    moduleName: bkjob_stdout
+  - dataId: 1110033
+    moduleName: bkjob_access
+  - dataId: 1110034
+    moduleName: bkjob_container

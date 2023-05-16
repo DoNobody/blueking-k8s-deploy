@@ -1,0 +1,61 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+replicaCount: 1
+resources:
+  limits:
+    cpu: 400m
+    memory: 1024Mi
+  requests:
+    memory: 128Mi
+    cpu: 200m
+# 蓝鲸入口域名
+ingress:
+  hostname: {{ .Values.domain.bkMainSiteDomain }}
+
+## 应用(bk_paas) 对应的 bk_app_secret, 与 ESB 的通信凭证
+appSecret: {{ .Values.appSecret.bk_paas }}
+
+## cookie 访问域
+bkDomain: "{{ .Values.domain.bkDomain }}"
+
+## 浏览器访问协议
+bkDomainScheme: {{ .Values.bkDomainScheme }}
+
+## PaaS3.0 开发者中心访问地址
+bkPaas3Url: "{{ .Values.bkDomainScheme }}://bkpaas.{{ .Values.domain.bkDomain }}"
+
+## ESB API 地址
+bkComponentApiUrl: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}"
+
+## 统一登录服务API访问地址 (默认为同命名空间下的 svc 地址)
+bkLoginApiUrl: "http://bk-login-web"
+
+## 用户管理访问地址
+bkUserUrl: "{{ .Values.bkDomainScheme }}://bkuser.{{ .Values.domain.bkDomain }}"
+
+## 蓝鲸 cmdb addr
+bkCmdbAddr: cmdb.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸 job addr
+bkJobAddr: job.{{ .Values.domain.bkDomain }}
+
+## bkiam 后端 url（默认为同命名空间下的 svc 地址）
+bkIamBackendUrl: http://bkiam-web
+
+# 外部DB
+mariadb:
+  enabled: false
+externalDatabase:
+  default:
+    host: {{ .Values.mysql.host }}
+    port: {{ .Values.mysql.port }}
+    user: root
+    password: {{ .Values.mysql.rootPassword }}
+    database: open_paas
+
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  dataId: 1110015
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+

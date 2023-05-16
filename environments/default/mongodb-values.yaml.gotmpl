@@ -1,0 +1,30 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+architecture: replicaset
+replicaCount: {{ .Values.mongodb.replicaCount }}
+persistence:
+  size: {{ .Values.mongodb.size }}
+auth:
+  enabled: true
+  rootUser: root
+  rootPassword: {{ .Values.mongodb.rootPassword }}
+  replicaSetKey: {{ .Values.mongodb.replicaSetKey }}
+arbiter:
+  enabled: false
+initdbScripts:
+  add_bkrepo.js: |
+    db = db.getSiblingDB('{{ .Values.bkrepo.externalMongodb.database }}');
+    if (db.getUser('{{ .Values.bkrepo.externalMongodb.username }}') == null) { db.createUser( {user: "{{ .Values.bkrepo.externalMongodb.username }}",pwd: "{{ .Values.bkrepo.externalMongodb.password }}",roles: [ { role: "readWrite", db: "{{ .Values.bkrepo.externalMongodb.database }}" } ]}) };
+  add_cmdb.js: |
+    db = db.getSiblingDB('{{ .Values.cmdb.mainMongodb.database }}');
+    if (db.getUser('{{ .Values.cmdb.mainMongodb.username }}') == null) { db.createUser( {user: "{{ .Values.cmdb.mainMongodb.username }}",pwd: "{{ .Values.cmdb.mainMongodb.password }}",roles: [ { role: "readWrite", db: "{{ .Values.cmdb.mainMongodb.database }}" } ]}) };
+  add_cmdb_event.js: |
+    db = db.getSiblingDB('{{ .Values.cmdb.watchMongodb.database }}');
+    if (db.getUser('{{ .Values.cmdb.watchMongodb.username }}') == null) { db.createUser( {user: "{{ .Values.cmdb.watchMongodb.username }}",pwd: "{{ .Values.cmdb.watchMongodb.password }}",roles: [ { role: "readWrite", db: "{{ .Values.cmdb.watchMongodb.database }}" } ]}) };
+  add_joblog.js: |
+    db = db.getSiblingDB('{{ .Values.job.mongodb.database }}');
+    if (db.getUser('{{ .Values.job.mongodb.username }}') == null) { db.createUser( {user: "{{ .Values.job.mongodb.username }}",pwd: "{{ .Values.job.mongodb.password }}",roles: [ { role: "readWrite", db: "{{ .Values.job.mongodb.database }}" } ]}) };
+  add_gse.js: |
+    db = db.getSiblingDB('{{ .Values.gse.mongodb.database }}');
+    if (db.getUser('{{ .Values.gse.mongodb.username }}') == null) { db.createUser( {user: "{{ .Values.gse.mongodb.username }}",pwd: "{{ .Values.gse.mongodb.password }}",roles: [ { role: "readWrite", db: "{{ .Values.gse.mongodb.database }}" } ]}) };
+

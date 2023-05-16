@@ -1,0 +1,83 @@
+init:
+  mongodb:
+    image:
+      registry: {{ .Values.imageRegistry }}
+      repository: blueking/codecc-mongo-init
+  storage:
+    image:
+      registry: {{ .Values.imageRegistry }}
+      repository: blueking/codecc-storage-init
+  entrance:
+    image:
+      registry: {{ .Values.imageRegistry }}
+      repository: blueking/codecc-entrance-init
+gateway:
+  image:
+      registry: {{ .Values.imageRegistry }}
+      repository: blueking/codecc-gateway
+task:
+  image:
+      registry: {{ .Values.imageRegistry }}
+      repository: blueking/codecc-task
+defect:
+  image:
+      registry: {{ .Values.imageRegistry }}
+      repository: blueking/codecc-defect
+report:
+  image:
+      registry: {{ .Values.imageRegistry }}
+      repository: blueking/codecc-report
+asyncreport:
+  image:
+      registry: {{ .Values.imageRegistry }}
+      repository: blueking/codecc-asyncreport
+codeccjob:
+  image:
+      registry: {{ .Values.imageRegistry }}
+      repository: blueking/codecc-codeccjob
+quartz:
+  image:
+      registry: {{ .Values.imageRegistry }}
+      repository: blueking/codecc-quartz
+  enabled: false
+schedule:
+  image:
+      registry: {{ .Values.imageRegistry }}
+      repository: blueking/codecc-schedule
+#日志监控配置
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  service:
+    dataId: 1
+  gatewayAccess:
+    dataId: 1
+  gatewayError:
+    dataId: 1
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+
+config:
+  bkCiPublicUrl: devops.{{ .Values.domain.bkDomain }}
+  bkCiPrivateUrl: devops.{{ .Values.domain.bkDomain }}
+  bkCodeccPublicUrl: codecc.{{ .Values.domain.bkDomain }}
+  bkCodeccPrivateUrl: codecc.{{ .Values.domain.bkDomain }}
+  bkCiProjectInnerUrl: bk-ci-bk-ci-project
+  bkCodeccStorageType: bkrepo
+  bkCodeccStorageBkrepoHost: bkrepo.{{ .Values.domain.bkDomain }}
+  bkCodeccStorageBkrepoAdminUsername: {{ .Values.bkrepo.common.username }}
+  bkCodeccStorageBkrepoAdminPassword: {{ .Values.bkrepo.common.password }}
+  #iam
+  bkCiAuthProvider: bk_login_v3
+  bkIamPrivateUrl: http://bkiam-web
+  bkCodeccAppCode: bk_codecc
+  bkCodeccAppToken: {{ .Values.appSecret.bk_codecc }}
+  bkPaasPrivateUrl: http://bkapi.{{ .Values.domain.bkDomain }}
+  bkCiIamCallbackUser: bk_iam
+  ## 网关相关参数
+  bkCiEnv: "" 
+  bkCiIamEnv: "" 
+  bkSsmHost: bkssm-web.{{ .Values.namespace }}.svc.cluster.local
+  bkSsmPort: 80
+  bkCiGatewaySsmTokenUrl: /api/v1/auth/access-tokens
+  bkCiAppCode: bk_codecc
+  bkCiAppToken: {{ .Values.appSecret.bk_codecc }}

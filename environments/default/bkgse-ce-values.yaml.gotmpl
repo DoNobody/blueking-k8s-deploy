@@ -1,0 +1,135 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+replicaCount: 1
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  dataId: 1110017
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+
+redis:
+  enabled: false
+externalRedisCluster:
+  host: {{ .Values.redisCluster.host }}
+  port: {{ .Values.redisCluster.port }}
+  password: {{ .Values.redisCluster.password }}
+
+fullnameOverride: "bk-gse"
+
+## 蓝鲸ESB网关配置(启用gse_procmgr、gse_syncdata时需要)
+bkComponentApiUrl: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}
+bkComponentUserName: "admin"
+bkComponentAppCode: "bk_gse"
+bkComponentAppSecret: {{ .Values.appSecret.bk_gse }}
+
+## 蓝鲸APIGateway的URL配置模板
+bkApiUrlTmpl: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}/api/{api_name}"
+
+## 蓝鲸APIGateway网关名称
+bkApigatewayName: "bk-gse"
+
+## 蓝鲸APIGateway网关授权应用列表
+## 示例: [{'bk_app_code':'app-1'},{'bk_app_code':'app-2'}]
+bkApigatewayGrantAppCodeList: '[{"bk_app_code":"bk_job"},{"bk_app_code":"bk_nodeman"},{"bk_app_code":"bk_cmdb"},{"bk_app_code":"bk_monitorv3"}]'
+
+## 配置bkApigatewayPublicKey用于对接apigateway解析jwt, base64
+bkApigatewayPublicKey: {{ index .Values.builtinGateway "bk-gse" "publicKeyBase64"  }}
+
+## 同步APIGateway资源配置
+apigwSync:
+  ## 默认为false不同步网关配置
+  enabled: true
+
+## 蓝鲸CMDB开发商账号配置(启用gse_procmgr、gse_syncdata时需要)
+bkCmdbSupplierAccount: "0"
+
+## bk-gse common base configuration
+common:
+  initZookeeper: true
+  defaultZoneID: "test"
+  defaultCityID: "test"
+
+mongodb:
+  enabled: false
+externalMongodb:
+  replicaSetName: {{ .Values.mongodb.rsName }}
+  hosts: {{ .Values.mongodb.host_port }}
+  username: {{ .Values.gse.mongodb.username }}
+  password: {{ .Values.gse.mongodb.password }}
+  database: {{ .Values.gse.mongodb.database }}
+
+zookeeper:
+  enabled: false
+externalZookeeper:
+  hosts: {{ .Values.gse.zookeeper.hosts }}
+  token: {{ .Values.gse.zookeeper.token }}
+
+gseCert:
+  ca: {{ readFile "cert/gseca.crt" | b64enc }}
+  cert: {{ readFile "cert/gse_server.crt" | b64enc }}
+  key: {{ readFile "cert/gse_server.key" | b64enc }}
+  apiClient:
+    cert: {{ readFile "cert/gse_api_client.crt" | b64enc }}
+    key: {{ readFile "cert/gse_api_client.key" | b64enc }}
+  agent:
+    cert: {{ readFile "cert/gse_agent.crt" | b64enc }}
+    key: {{ readFile "cert/gse_agent.key" | b64enc }}
+
+gseTask:
+  resources:
+    limits:
+      memory: 4096Mi
+      cpu: 2000m
+    requests:
+      memory: 64Mi
+      cpu: 100m
+
+gseFile:
+  resources:
+    limits:
+      memory: 4096Mi
+      cpu: 2000m
+    requests:
+      memory: 64Mi
+      cpu: 100m
+
+gseProc:
+  enabled: true
+  resources:
+    limits:
+      memory: 2048Mi
+      cpu: 1000m
+    requests:
+      memory: 64Mi
+      cpu: 100m
+
+gseData:
+  config:
+    netdev: {{ .Values.gse.netdev }}
+  resources:
+    limits:
+      memory: 4096Mi
+      cpu: 2000m
+    requests:
+      memory: 128Mi
+      cpu: 200m
+
+gseCluster:
+  resources:
+    limits:
+      memory: 4096Mi
+      cpu: 2000m
+    requests:
+      memory: 128Mi
+      cpu: 200m
+
+gseAgent:
+  enabled: false
+  image:
+    registry: {{ .Values.imageRegistry }}
+  resources:
+    limits:
+      memory: 200Mi
+    requests:
+      cpu: 100m
+      memory: 200Mi

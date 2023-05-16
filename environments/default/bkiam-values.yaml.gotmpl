@@ -1,0 +1,58 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+replicaCount: 1
+nameOverride: "bkiam"
+fullnameOverride: "bkiam"
+resources:
+  limits:
+    memory: 2048Mi
+    cpu: 2000m
+  requests:
+    memory: 128Mi
+    cpu: 100m
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  dataId: 1110012
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+ingress:
+  hostname: bkiam-api.{{ .Values.domain.bkDomain }}
+mariadb:
+  enabled: false
+redis:
+  enabled: false
+externalDatabase:
+  default:
+    host: {{ .Values.mysql.host }}
+    port: {{ .Values.mysql.port }}
+    user: root
+    password: {{ .Values.mysql.rootPassword }}
+    database: bkiam
+
+#  openPaas:
+#    enabled: true
+#    host: {{ .Values.mysql.host }}
+#    port: 3306
+#    user: root
+#    password: {{ .Values.mysql.rootPassword }}
+#    database: open_paas
+externalRedis:
+  default:
+    host: {{ .Values.redis.host }}
+    port: {{ .Values.redis.port }}
+    password: {{ .Values.redis.password }}
+
+## 权限中心的app_code/app_secret, 用于访问bkauth服务, 注意需要在bkauth的应用白名单中
+appCode: "bk_iam"
+appSecret: {{ .Values.appSecret.bk_iam }}
+
+## 是否对接 bkauth
+## - true, 则需要配置 bkAuthApiUrl、bkAppCode、bkAppSecret
+## - fasle, 则需要配置 mariadb.externalDatabase.openPaas
+enableBkAuth: true
+
+## BKAuth API 地址, 如果enableBkAuth=true, 这个变量必须配置, 否则权限中心无法正常服务
+bkAuthApiUrl: "http://bkauth"
+
+## 接入apigateway分配的publicKey
+bkApigatewayPublicKey: {{ index .Values.builtinGateway "bk-iam" "publicKeyBase64"  }}

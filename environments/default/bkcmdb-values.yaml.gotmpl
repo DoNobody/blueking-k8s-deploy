@@ -1,0 +1,240 @@
+image:
+  registry: {{ .Values.imageRegistry }}
+adminserver:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+apiserver:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 2
+      memory: 2048Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+authserver:
+  ingress:
+    enabled: false
+    # register with IAM callback url using this value
+    host: bk-cmdb-auth.{{ .Values.namespace }}.svc.cluster.local
+cacheservice:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1 
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+cloudserver:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+coreservice:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1 
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 200m
+datacollection:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 200m
+eventserver:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+hostserver:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+operationserver:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+procserver:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+synchronizeserver:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+taskserver:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 200m
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+toposerver:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+webserver:
+  replicas: 1
+  ingress:
+    host: cmdb.{{ .Values.domain.bkDomain }}
+  resources:
+    limits:
+      cpu: 1
+      memory: 1024Mi
+    requests:
+      memory: 64Mi
+      cpu: 100m
+migrate:
+  migrateDataId: {{ .Values.cmdb.migrateDataId.enabled }}
+iam:
+  auth:
+    enabled: true
+common:
+  auth:
+    appCode: bk_cmdb
+    appSecret: {{ .Values.appSecret.bk_cmdb }}
+  esb:
+    appCode: bk_cmdb
+    appSecret: {{ .Values.appSecret.bk_cmdb }}
+  gse:
+    apiServer:
+      endpoints:
+        - bk-gse-task:59313
+    taskServer:
+      endpoints:
+        - bk-gse-task:48673
+  eventServer:
+    ## 下发主机身份相关配置
+    hostIdentifier:
+      startUp: true
+      # 下发的hostid文件所在路径
+      linux:
+        filePath: "/var/lib/gse/host"
+      windows:
+        filePath: "c:/gse/data/host"
+
+  webServer:
+    site:
+      domainUrl: {{ .Values.bkDomainScheme }}://cmdb.{{ .Values.domain.bkDomain }}
+      authScheme: iam
+    login:
+      version: blueking
+  es:
+    fullTextSearch: "on"
+    url: http://{{ .Values.elasticsearch.host }}:{{ .Values.elasticsearch.port }}
+    usr: {{ .Values.elasticsearch.username }}
+    pwd: {{ .Values.elasticsearch.password }}
+
+zookeeper:
+  enabled: false
+configAndServiceCenter:
+  addr: {{ .Values.cmdb.zookeeper.hosts }}
+monstache:
+  enabled: true
+redis:
+  enabled: false
+  redis:
+    host: {{ .Values.redis.host }}:{{ .Values.redis.port }}
+    pwd: {{ .Values.redis.password }}
+  snapshotRedis:
+    host: {{ .Values.redis.host }}:{{ .Values.redis.port }}
+    pwd: {{ .Values.redis.password }}
+  discoverRedis:
+    host: {{ .Values.redis.host }}:{{ .Values.redis.port }}
+    pwd: {{ .Values.redis.password }}
+  netCollectRedis:
+    host: {{ .Values.redis.host }}:{{ .Values.redis.port }}
+    pwd: {{ .Values.redis.password }}
+
+mongodb:
+  enabled: false
+  externalMongodb:
+    host: {{ .Values.mongodb.host_port }}
+    usr: {{ .Values.cmdb.mainMongodb.username }}
+    pwd: {{ .Values.cmdb.mainMongodb.password }}
+    database: {{ .Values.cmdb.mainMongodb.database }}
+    rsName: {{ .Values.mongodb.rsName }}
+  watch:
+    host: {{ .Values.mongodb.host_port }}
+    usr: {{ .Values.cmdb.watchMongodb.username }}
+    pwd: {{ .Values.cmdb.watchMongodb.password }}
+    database: {{ .Values.cmdb.watchMongodb.database }}
+    rsName: {{ .Values.mongodb.rsName }}
+
+bkLogConfig:
+  file:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110018
+  std:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110019
+
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+
+## 蓝鲸 PaaS url（浏览器访问蓝鲸入口）
+bkPaasUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}
+## 蓝鲸权限中心后台 API 地址
+bkIamApiUrl: http://bkiam-web
+## 蓝鲸 ESB/APIGATEWAY url，注意集群内外都是统一域名。集群内可以配置域名解析到内网ip
+bkComponentApiUrl: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}
+## 蓝鲸登录后台的内部服务地址（一般用于校验登录token）
+bkLoginApiUrl: http://bk-login-web
+## 蓝鲸节点管理 SaaS URL
+bkNodemanUrl: {{ .Values.bkDomainScheme }}://bknodeman.{{ .Values.domain.bkDomain }}
+
+# 调用GSE证书
+gseCert:
+  ca: {{ readFile "cert/gseca.crt" | b64enc }}
+  cmdbCert: {{ readFile "cert/platform.cert" | b64enc }}
+  cmdbKey: {{ readFile "cert/platform.key" | b64enc }}
+

@@ -1,0 +1,12 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+helmfiles:
+  - path: ./monitor-storage.yaml.gotmpl
+  - path: ./04-bkmonitor.yaml.gotmpl
+  - path: ./04-bkmonitor-operator.yaml.gotmpl
+  - path: ./04-bklog-collector.yaml.gotmpl
+  - path: ./04-bklog-search.yaml.gotmpl

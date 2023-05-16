@@ -1,0 +1,16 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+## Helmfile runs various helm commands to converge the current state in the live cluster to the desired state defined here.
+releases:
+  - name: bkmonitor-operator
+    namespace: bkmonitor-operator
+    chart: blueking/bkmonitor-operator-stack
+    version: {{ index .Values.version "bkmonitor-operator-stack" }}
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/bkmonitor-operator-values.yaml.gotmpl
+    - ./environments/default/bkmonitor-operator-custom-values.yaml.gotmpl

@@ -1,0 +1,48 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+## Helmfile runs various helm commands to converge the current state in the live cluster to the desired state defined here.
+releases:
+  - name: ingress-nginx
+    namespace: ingress-nginx
+    chart: ./charts/ingress-nginx-{{ index .Values.version "ingress-nginx" }}.tgz
+    version: {{ index .Values.version "ingress-nginx" }}
+    values:
+      - controller:
+          metrics:
+            enabled: true
+          image:
+            registry: {{ .Values.imageRegistry }}/k8s.gcr.io
+            tag: "v0.49.0"
+            digest: ""
+          config:
+            # 日志格式和filebeat采集配置保持一致
+            log-format-upstream: '$remote_addr - $remote_user [$time_local] "$request" $status $body_bytes_sent "$http_referer" "$http_user_agent" $request_length $request_time [$proxy_upstream_name] [$proxy_alternative_upstream_name] $upstream_addr $upstream_response_length $upstream_response_time $upstream_status $req_id'
+            # nginx 与 client 保持的一个长连接能处理的请求数量，默认 100，高并发场景建议调高。
+            # 参考: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#keep-alive-requests
+            keep-alive-requests: "10000"
+            # nginx 与 upstream 保持长连接的最大空闲连接数 (不是最大连接数)，默认 32，在高并发下场景下调大，避免频繁建连导致 TIME_WAIT 飙升。
+            # 参考: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#upstream-keepalive-connections
+            upstream-keepalive-connections: "200"
+            # 每个 worker 进程可以打开的最大连接数，默认 16384。
+            # 参考: https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#max-worker-connections
+            max-worker-connections: "65536"
+            # 上传文件需要
+            proxy-body-size: "2G"
+            proxy-read-timeout: "600"
+          service:
+            type: NodePort
+            nodePorts:
+              http: 32080
+              https: 32443
+          hostNetwork: {{ .Values.ingressNginx.hostNetwork }}
+          ingressClassResource:
+              enabled: true
+              default: true
+          admissionWebhooks:
+            patch:
+              image:
+                registry: {{ .Values.imageRegistry }}

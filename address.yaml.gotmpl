@@ -1,0 +1,125 @@
+## 蓝鲸 cookie 访问域，推荐用 .global.bkDomain 获取
+global:
+  bkDomain: {{ .Values.domain.bkDomain }}
+  ## 蓝鲸主域名访问协议http/https
+  bkDomainScheme: {{ .Values.bkDomainScheme }}
+
+## 兼容写法
+bkDomain: {{ .Values.domain.bkDomain }}
+bkDomainScheme: {{ .Values.bkDomainScheme }}
+
+## 蓝鲸 PaaS url（浏览器访问蓝鲸入口）
+bkPaasUrl: http://{{ .Values.domain.bkMainSiteDomain }}
+
+## 蓝鲸 Login url（浏览器跳转登录用的URL前缀）
+bkLoginUrl: http://{{ .Values.domain.bkMainSiteDomain }}/login
+## 蓝鲸 Login 地址，用于ingress的host变量
+bkLoginAddr: {{ .Values.domain.bkMainSiteDomain }}
+
+## 蓝鲸登录后台的内部服务地址（一般用于校验登录token）
+bkLoginApiUrl: http://bk-login-web
+
+## 蓝鲸 ESB url，注意集群内外都是统一域名。集群内可以配置域名解析到内网ip
+bkComponentApiUrl: http://bkapi.{{ .Values.domain.bkDomain }}
+## 蓝鲸 APIGATEWAY url，注意集群内外都是统一域名。集群内可以配置域名解析到内网ip
+bkApigatewayUrl: http://bkapi.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸用户管理 SaaS地址
+bkUserUrl: http://bkuser.{{ .Values.domain.bkDomain }}
+bkUserAddr: bkuser.{{ .Values.domain.bkDomain }}
+## 蓝鲸用户管理后台 API 地址
+bkUserApiUrl: http://bkuserapi-web
+
+## 蓝鲸权限中心 SaaS 地址
+bkIamUrl: http://bkiam.{{ .Values.domain.bkDomain }}
+## 蓝鲸权限中心SaaS的后台 API 地址
+bkIamSaasApiUrl: http://bkiam-saas-api
+## 蓝鲸权限中心后台 API 地址
+bkIamApiUrl: http://bkiam-web
+
+## 蓝鲸凭证管理后台 API 地址
+bkSsmApiUrl: http://bkssm-web
+
+## 蓝鲸Auth服务 Api 地址
+bkAuthApiUrl: http://bkauth
+
+# Apigateway网关浏览器访问地址
+bkApigwUrl: http://apigw.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸 PaaS3.0 开发者中心 
+bkPaas3Addr: bkpaas.{{ .Values.domain.bkDomain }}
+bkPaas3Url: http://bkpaas.{{ .Values.domain.bkDomain }}
+
+# Lesscode（低代码平台） 独立域名浏览器访问地址
+bkLessCodeUrl: http://lesscode.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸制品库浏览器访问域名和后台 API 域名同一个
+bkRepoUrl: http://bkrepo.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸配置平台浏览器访问地址
+bkCmdbUrl: http://cmdb.{{ .Values.domain.bkDomain }}
+bkCmdbAddr: cmdb.{{ .Values.domain.bkDomain }}
+## 蓝鲸配置平台后台 API 地址
+bkCmdbApiUrl: http://bk-cmdb-api
+
+## 蓝鲸作业平台浏览器访问地址
+bkJobUrl: http://job.{{ .Values.domain.bkDomain }}
+bkJobAddr: job.{{ .Values.domain.bkDomain }}
+bkJobApiUrl: http://job-api.{{ .Values.domain.bkDomain }}
+bkJobApiAddr: job-api.{{ .Values.domain.bkDomain }}
+## 蓝鲸作业平台后台 API 访问地址（只有esb会使用）
+bkJobApiBackendUrl: https://bk-job-gateway
+
+## 蓝鲸管控平台 API 地址
+bkGseCacheapiHost: "bk-gse-api"
+bkGseCacheapiPort: "59313"
+## 蓝鲸管控平台插件管理后台 API 地址
+bkGsePmsUrl: "http://bk-gse-procmgr:52030"
+## 蓝鲸管控平台配置后台 API 地址
+bkGseConfigUrl: "http://bk-gse-config:59702"
+
+## 蓝鲸流程管理 SaaS URL
+bkItsmUrl: "http://apps.{{ .Values.domain.bkDomain }}/bk--itsm"
+## 蓝鲸节点管理 SaaS URL
+bkNodemanUrl: http://bknodeman.{{ .Values.domain.bkDomain }}
+## 蓝鲸节点管理 API URL
+bkNodemanApiUrl: "http://bk-nodeman-backend-api"
+## 蓝鲸标准运维 SaaS URL
+bkSopsUrl: "http://apps.{{ .Values.domain.bkDomain }}/prod--api--bk--sops"
+## 蓝鲸 GSEKIT SaaS URL
+bkGsekitUrl: "http://apps.{{ .Values.domain.bkDomain }}/bk--gsekit"
+## 蓝鲸监控平台浏览器访问地址
+bkMonitorUrl: http://bkmonitor.{{ .Values.domain.bkDomain }}
+## 蓝鲸监控平台后台 API URL
+bkMonitorApiUrl: http://bk-monitor-api
+## 蓝鲸日志平台浏览器访问地址
+bkLogSearchUrl: http://bklog.{{ .Values.domain.bkDomain }}
+## 蓝鲸日志平台后台 API URL
+bkLogSearchApiUrl: http://bk-log-search-api
+## 蓝鲸文档中心 URL
+bkDocsCenterUrl: https://bk.tencent.com/docs
+bkDocsCenterApiUrl: http://apps.{{ .Values.domain.bkDomain }}/bk--docs--center
+
+## 蓝盾浏览器访问地址（蓝盾后台API尚未接入apigateway/esb）
+bkCiUrl: http://devops.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸容器管理平台 SaaS 访问域名
+bkBcsUrl: http://bcs.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸容器管理平台配置服务api（默认部署在bcs-system下）
+bkBcsApiUrl: http://bcs-api-gateway.bcs-system.svc.cluster.local
+bkBcsCcApiUrl: http://bcs-ui-cc.bcs-system.svc.cluster.local:5000
+
+### 计算平台后台服务 API 地址，默认是固定bkbase的namespace
+bkDataV3AuthapiUrl: "http://bkbase-authapi.bkbase.svc.cluster.local:8000"
+bkDataV3AccessapiUrl: "http://bkbase-datahubapi.bkbase.svc.cluster.local:8000"
+bkDataV3DatabusapiUrl: "http://bkbase-datahubapi.bkbase.svc.cluster.local:8000"
+bkDataV3DataflowapiUrl: "http://bkbase-dataflowapi.bkbase.svc.cluster.local:8000"
+bkDataV3DatamanageapiUrl: "http://bkbase-datamanageapi.bkbase.svc.cluster.local:8000"
+bkDataV3DataqueryapiUrl: "http://bkbase-queryengine-api.bkbase.svc.cluster.local:8000"
+bkDataV3MetaapiUrl: "http://bkbase-metaapi.bkbase.svc.cluster.local:8000"
+bkDataV3StorekitapiUrl: "http://bkbase-datahubapi.bkbase.svc.cluster.local:8000"
+bkDataV3BksqlUrl: "http://bkbase-bksqlextend-service.bkbase.svc.cluster.local:8596"
+bkDataV3DatalabapiUrl: "http://bkbase-datalabapi.bkbase.svc.cluster.local:8000"
+bkDataV3AiopsapiUrl: "http://bkbase-aiopsapi.bkbase.svc.cluster.local:8000"
+bkDataV3ResourcecenterapiUrl: "http://bkbase-resourcecenterapi.bkbase.svc.cluster.local:8000"

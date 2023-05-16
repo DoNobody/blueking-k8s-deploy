@@ -1,0 +1,16 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+architecture: standalone
+master:
+  persistence:
+    size: {{ .Values.redis.size }}
+  resources:
+    limits:
+      memory: 1024Mi
+      cpu: 1000m
+    requests:
+      memory: 64Mi
+      cpu: 100m
+auth:
+  enabled: true
+  password: {{ .Values.redis.password }} 

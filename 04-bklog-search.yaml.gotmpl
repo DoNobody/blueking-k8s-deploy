@@ -1,0 +1,21 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+## Helmfile runs various helm commands to converge the current state in the live cluster to the desired state defined here.
+releases:
+  - name: bk-log-search
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bk-log-search
+    version: {{ index .Values.version "bk-log-search"  }}
+    hooks:
+      - events: ["presync"]
+        showlogs: true
+        command: "./scripts/add_bkrepo_bucket.sh"
+        args: ["http://bkrepo.{{`{{.Values.domain.bkDomain }}`}}", "{{`{{.Values.bklog.bkrepo.repoName}}`}}", "{{`{{.Values.bklog.bkrepo.user}}`}}", "{{`{{.Values.bklog.bkrepo.password}}`}}"]
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/bklog-search-values.yaml.gotmpl
+    - ./environments/default/bklog-search-custom-values.yaml.gotmpl

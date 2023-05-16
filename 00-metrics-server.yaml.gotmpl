@@ -1,0 +1,20 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+releases:
+  - name: metrics-server
+    namespace: kube-system
+    chart: ./charts/metrics-server-{{ index .Values.version "metrics-server" }}.tgz
+    version: {{ index .Values.version "metrics-server" }}
+    values:
+      - global:
+          imageRegistry: {{ .Values.imageRegistry }}
+        apiService:
+          create: true
+        extraArgs:
+          kubelet-preferred-address-types: InternalIP
+          kubelet-insecure-tls: true
+

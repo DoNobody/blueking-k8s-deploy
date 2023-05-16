@@ -1,0 +1,20 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+helmfiles:
+  - path: ./base-storage.yaml.gotmpl
+  - path: ./base-blueking.yaml.gotmpl
+    selectors:
+    - seq=first
+  - path: ./base-blueking.yaml.gotmpl
+    selectors:
+    - seq=second
+  - path: ./base-blueking.yaml.gotmpl
+    selectors:
+    - seq=third
+  - path: ./base-blueking.yaml.gotmpl
+    selectors:
+    - seq=fourth

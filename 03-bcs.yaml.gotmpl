@@ -1,0 +1,27 @@
+bases:
+  - env.yaml
+---
+helmDefaults:
+  cleanupOnFail: false
+  wait: false
+  waitForJobs: false
+  timeout: 600
+  createNamespace: false
+---
+releases:
+  - name: bcs-services-stack
+    namespace: {{ .Values.bcs.namespace | default .Values.namespace }}
+    chart: blueking/bcs-services-stack
+    version: {{ index .Values.version "bcs-services-stack" }}
+    hooks:
+      - events: ["prepare"]
+        showlogs: true
+        command: "bash"
+        args:
+        - './scripts/create_bcs_namespace.sh'
+        - '{{ .Values.bcs.namespace | default .Values.namespace }}'
+    missingFileHandler: Warn
+    values:
+    - environments/default/bcs/values.yaml.gotmpl
+    - environments/default/bcs/resources.yaml.gotmpl
+    - environments/default/bcs-custom-values.yaml.gotmpl

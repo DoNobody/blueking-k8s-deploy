@@ -1,0 +1,51 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+replicaCount: 1
+containerPort: 5000
+nameOverride: "bkauth"
+fullnameOverride: "bkauth"
+resources:
+  limits:
+    memory: 1024Mi
+    cpu: 1000m
+  requests:
+    memory: 64Mi
+    cpu: 100m
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  dataId: 1110010
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+ingress:
+  hostname: bkauth.{{ .Values.domain.bkDomain }}
+redis:
+  enabled: false
+externalRedis:
+  default:
+    host: {{ .Values.redis.host }}
+    port: {{ .Values.redis.port }}
+    password: {{ .Values.redis.password }}
+    db: 0
+mariadb:
+  enabled: false
+externalDatabase:
+  default:
+    host: {{ .Values.mysql.host }}
+    port: {{ .Values.mysql.port }}
+    user: root
+    password: {{ .Values.mysql.rootPassword }}
+    database: bkauth
+
+  openPaas:
+    enabled: true
+    host: {{ .Values.mysql.host }}
+    port: 3306
+    user: root
+    password: {{ .Values.mysql.rootPassword }}
+    database: open_paas
+  
+## 配置AppSecret在DB的加密密钥
+encryptKey: {{ .Values.bkauth.encryptKey }}
+
+## 配置需要初始化的AppCode和AppSecret
+accessKeys: {{ .Values.appSecret | toYaml | nindent 10}}

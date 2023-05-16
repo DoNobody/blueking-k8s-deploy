@@ -1,0 +1,59 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+replicaCount: 1
+resources:
+  limits:
+    cpu: 200m
+    memory: 1024Mi
+  requests:
+    memory: 256Mi
+    cpu: 200m
+bkDomain: {{ .Values.domain.bkDomain }}
+bkDomainScheme: {{ .Values.bkDomainScheme }}
+
+## 蓝鲸 ESB url, 集群内访问不用兼容协议
+bkComponentApiUrl: http://bkapi.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸用户管理 addr
+bkUserAddr: bkuser.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸 PaaS3.0 开发者中心 addr
+bkPaas3Addr: bkpaas.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸 cmdb addr
+bkCmdbAddr: cmdb.{{ .Values.domain.bkDomain }}
+
+## 蓝鲸 job addr
+bkJobAddr: job.{{ .Values.domain.bkDomain }}
+
+## 登录 url
+bkLoginApiUrl: http://bk-login-web
+
+## 初始化 bk_app_code，多个以英文逗号分隔
+initBkAppCodeList: ""
+
+## app secret
+appSecret: {{ .Values.appSecret.bk_paas }}
+
+## 蓝鲸 Oauth 服务
+bkOauth:
+  enabled: true
+
+ingress:
+  hostname: {{ .Values.domain.bkMainSiteDomain }}
+mariadb:
+  enabled: false
+externalDatabase:
+  default:
+    host: {{ .Values.mysql.host }}
+    port: {{ .Values.mysql.port }}
+    user: root
+    password: {{ .Values.mysql.rootPassword }}
+    database: open_paas
+
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  dataId: 1
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+

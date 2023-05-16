@@ -1,0 +1,126 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+auth:
+  username: {{ .Values.rabbitmq.username }}
+  password: {{ .Values.rabbitmq.password }}
+  erlangCookie: {{ .Values.rabbitmq.erlangCookie }}
+persistence:
+  size: {{ .Values.rabbitmq.size }}
+## 以下为了实现安装后自动初始化所需的vhost和用户
+extraSecrets:
+  load-definition:
+    load_definition.json: |
+      {
+        "users": [
+          {
+            "name": "{{ .Values.rabbitmq.username }}",
+            "password": "{{ .Values.rabbitmq.password }}",
+            "tags": "administrator"
+          },
+          {
+            "name": "{{ .Values.bkiam.rabbitmq.user}}",
+            "password": "{{ .Values.bkiam.rabbitmq.password }}",
+            "tags": "management"
+          },
+          {
+            "name": "{{ .Values.job.rabbitmq.user }}",
+            "password": "{{ .Values.job.rabbitmq.password }}",
+            "tags": "management"
+          },
+          {
+            "name": "{{ .Values.bknodeman.rabbitmq.user }}",
+            "password": "{{ .Values.bknodeman.rabbitmq.password }}",
+            "tags": "management"
+          },
+          {
+            "name": "{{ .Values.paas.rabbitmq.user }}",
+            "password": "{{ .Values.paas.rabbitmq.password }}",
+            "tags": "management"
+          },
+          {
+            "name": "{{ .Values.bkmonitor.rabbitmq.user }}",
+            "password": "{{ .Values.bkmonitor.rabbitmq.password }}",
+            "tags": "management"
+          },
+          {
+            "name": "{{ .Values.bklog.rabbitmq.user }}",
+            "password": "{{ .Values.bklog.rabbitmq.password }}",
+            "tags": "management"
+          }
+        ],
+        "vhosts": [
+          {
+            "name": "/"
+          },
+          {
+            "name": "{{ .Values.bkiam.rabbitmq.vhost }}"
+          },
+          {
+            "name": "{{ .Values.job.rabbitmq.vhost }}"
+          },
+          {
+            "name": "{{ .Values.bknodeman.rabbitmq.vhost }}"
+          },
+          {
+            "name": "{{ .Values.paas.rabbitmq.vhost }}"
+          },
+          {
+            "name": "{{ .Values.bkmonitor.rabbitmq.vhost }}"
+          },
+          {
+            "name": "{{ .Values.bklog.rabbitmq.vhost }}"
+          }
+        ],
+        "permissions": [
+          {
+            "vhost": "{{ .Values.bkiam.rabbitmq.vhost }}",
+            "user": "{{ .Values.bkiam.rabbitmq.user }}",
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*"
+          },
+          {
+            "vhost": "{{ .Values.job.rabbitmq.vhost }}",
+            "user": "{{ .Values.job.rabbitmq.user }}",
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*"
+          },
+          {
+            "vhost": "{{ .Values.bknodeman.rabbitmq.vhost }}",
+            "user": "{{ .Values.bknodeman.rabbitmq.user }}",
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*"
+          },
+          {
+            "vhost": "{{ .Values.paas.rabbitmq.vhost }}",
+            "user": "{{ .Values.paas.rabbitmq.user }}",
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*"
+          },
+          {
+            "vhost": "{{ .Values.bkmonitor.rabbitmq.vhost }}",
+            "user": "{{ .Values.bkmonitor.rabbitmq.user }}",
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*"
+          },
+          {
+            "vhost": "{{ .Values.bklog.rabbitmq.vhost }}",
+            "user": "{{ .Values.bklog.rabbitmq.user }}",
+            "configure": ".*",
+            "read": ".*",
+            "write": ".*"
+          }
+        ]
+      }
+
+loadDefinition:
+  enabled: true
+  existingSecret: load-definition
+extraConfiguration: |-
+  load_definitions = /app/load_definition.json
+  consumer_timeout = 31622400000
+

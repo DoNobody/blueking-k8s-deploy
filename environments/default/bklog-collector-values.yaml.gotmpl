@@ -1,0 +1,35 @@
+## 采集器工作目录(对应到主机的目录)，用来存放配置文件、日志、进度文件等数据
+rootWorkPath: /var/lib/bkunifylogbeat
+
+bkunifylogbeat:
+  image:
+    registry: {{ .Values.imageRegistry }}
+  resources:
+    limits:
+      memory: 2Gi
+    requests:
+      cpu: 100m
+      memory: 200Mi
+  # ipc path 与gse_agent通信的路径
+  ipcPath: "/var/run/ipc.state.report"
+
+# sidecar镜像
+bklogsidecar:
+  image:
+    registry: {{ .Values.imageRegistry }}
+  resources:
+    limits:
+      memory: 2Gi
+    requests:
+      cpu: 100m
+      memory: 200Mi
+
+## 是否开启系统K8S组件日志采集，默认为false
+k8sSystemLog:
+  enabled: false
+  dataId: 1
+nodeSystemLog:
+  enabled: false
+  dataId: 1
+
+

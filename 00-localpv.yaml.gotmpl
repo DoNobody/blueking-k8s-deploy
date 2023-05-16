@@ -1,0 +1,24 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+## Helmfile runs various helm commands to converge the current state in the live cluster to the desired state defined here.
+releases:
+  - name: localpv
+    namespace: kube-system
+    chart: ./charts/provisioner-{{ .Values.version.provisioner }}.tgz
+    version: {{ .Values.version.provisioner }}
+    values:
+      - daemonset:
+          image: {{ .Values.imageRegistry }}/k8s.gcr.io/sig-storage/local-volume-provisioner:v2.4.0
+        classes:
+        - name: local-storage
+          hostDir: {{ .Values.localpv.hostDir }}
+          volumeMode: Filesystem
+          storageClass: 
+            # create and set storage class as default
+            isDefaultClass: true
+            reclaimPolicy: {{ .Values.localpv.reclaimPolicy }}
+

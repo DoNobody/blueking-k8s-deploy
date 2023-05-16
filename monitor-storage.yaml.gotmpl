@@ -1,0 +1,34 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+## Helmfile runs various helm commands to converge the current state in the live cluster to the desired state defined here.
+releases:
+  - name: bk-kafka
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/kafka-{{ .Values.version.kafka }}.tgz
+    version: {{ .Values.version.kafka }}
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/kafka-values.yaml.gotmpl
+    - ./environments/default/kafka-custom-values.yaml.gotmpl
+
+  - name: bk-consul
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/consul-{{ .Values.version.consul }}.tgz
+    version: {{ .Values.version.consul }}
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/consul-values.yaml.gotmpl
+    - ./environments/default/consul-custom-values.yaml.gotmpl
+
+  - name: bk-influxdb
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/influxdb-{{ .Values.version.influxdb }}.tgz
+    version: {{ .Values.version.influxdb }}
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/influxdb-values.yaml.gotmpl
+    - ./environments/default/influxdb-custom-values.yaml.gotmpl

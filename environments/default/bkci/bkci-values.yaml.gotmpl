@@ -1,0 +1,97 @@
+# RBAC配置
+rbac:
+  enabled: true
+  serviceAccount: bkci
+  clusterRole:
+    enabled: true
+  clusterRoleBinding:
+    enabled: true
+
+# gateway 镜像配置
+gatewayImage:
+  registry: {{ .Values.imageRegistry }}
+  repository: blueking/bkci-gateway
+
+# backend 镜像配置
+backendImage:
+  registry: {{ .Values.imageRegistry }}
+  repository: blueking/bkci-backend
+
+#日志监控配置
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  service:
+    dataId: 1
+  gatewayAccess:
+    dataId: 1
+  gatewayError:
+    dataId: 1
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+
+turbo:
+  # 是否开启编译加速
+  enabled: true
+  image:
+    registry: {{ .Values.imageRegistry }}
+    repository: blueking/bkci-turbo
+  config:
+    tbs:
+      # 编译加速请求主网关
+      rootPath: http://bktbs.{{ .Values.domain.bkDomain }}/gateway
+      # 编译加速详情页面
+      dashboard: http://bktbs.{{ .Values.domain.bkDomain }}/dashboard?id
+    devops:
+      # 编译加速请求主页面
+      rootPath: http://devops.{{ .Values.domain.bkDomain }}/
+
+config:
+  # 公网域名
+  bkCiHost: devops.{{ .Values.domain.bkDomain }}
+  # 公网域名(带http)
+  bkCiPublicUrl: http://devops.{{ .Values.domain.bkDomain }}
+  # 蓝鲸登录小窗
+  bkCiPaasDialogLoginUrl: http://{{ .Values.domain.bkMainSiteDomain }}/login
+  # 蓝鲸登录窗
+  bkCiPaasLoginUrl: http://{{ .Values.domain.bkMainSiteDomain }}/login
+  # IAM SaaS入口url
+  bkCiIamWebUrl: http://apps.{{ .Values.domain.bkDomain }}/bk--iam/
+  # 鉴权方式
+  bkCiAuthProvider: bk_login_v3
+  # 网关用户认证token验证URL的路径 
+  bkCiGatewaySsmTokenUrl: /api/v1/auth/access-tokens
+  # iam提供的应用Token，需提前申请
+  bkCiAppToken: {{ .Values.appSecret.bk_ci }}
+  # paas内部地址
+  bkPaasPrivateUrl: http://bkapi.{{ .Values.domain.bkDomain }}
+  # iam内部地址
+  bkIamPrivateUrl: http://bkiam-web
+  # 用户认证地址，必须全路径
+  bkSsmHost: bkssm-web.{{ .Values.namespace }}.svc.cluster.local
+  # 文档地址
+  bkCiDocsUrl: https://bk.tencent.com/docs/markdown/持续集成平台/产品白皮书
+  # PaaS用户头像, 目前仅显示默认头像
+  bkCiStoreUserAvatarsUrl: http://bkuser.{{ .Values.domain.bkDomain }}/static/img/logo_default.png?
+  # 第三方构建机状态是否上报
+  bkCiEnvironmentAgentCollectorOn: true
+  # gitlab配置
+  bkCiRepositoryGitlabUrl: https://gitlab.com
+  # 蓝鲸集群内使用的url, 如iam回调ci时
+  bkCiPrivateUrl: http://devops.{{ .Values.domain.bkDomain }}
+  # 编译加速url
+  bkTurboPublicUrl: http://bktbs.{{ .Values.domain.bkDomain }}
+  #对接制品库
+  bkRepoHost: bkrepo.{{ .Values.domain.bkDomain }}
+  bkRepoGatewayIp: bkrepo.{{ .Values.domain.bkDomain }}
+  bkRepoApiUrl: http://bkrepo.{{ .Values.domain.bkDomain }}
+  bkCiArtifactoryRealm: bkrepo
+  bkRepoAuthorization: "Platform MThiNjFjOWMtOTAxYi00ZWEzLTg5YzMtMWY3NGJlOTQ0YjY2OlVzOFpHRFhQcWs4NmN3TXVrWUFCUXFDWkxBa00zSw=="
+  bkCiBkrepoAuthorization: "Platform MThiNjFjOWMtOTAxYi00ZWEzLTg5YzMtMWY3NGJlOTQ0YjY2OlVzOFpHRFhQcWs4NmN3TXVrWUFCUXFDWkxBa00zSw=="
+  bkRepoUsername: {{ .Values.bkrepo.common.username }}
+  bkRepoPassword: {{ .Values.bkrepo.common.password }}
+  #配置Github oauth, 申请地址: https://github.com/settings/applications/new
+  bkCiRepositoryGithubApp: ""
+  bkCiRepositoryGithubClientId: ""
+  bkCiRepositoryGithubClientSecret: ""
+  #配置Github webhook, 申请地址: https://docs.github.com/cn/developers/webhooks-and-events/webhooks/securing-your-webhooks
+  bkCiRepositoryGithubSignSecret: ""

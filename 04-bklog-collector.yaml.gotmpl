@@ -1,0 +1,16 @@
+bases:
+  - env.yaml
+---
+bases:
+  - defaults.yaml
+---
+## Helmfile runs various helm commands to converge the current state in the live cluster to the desired state defined here.
+releases:
+  - name: bklog-collector
+    namespace: {{ .Values.namespace }}
+    chart: blueking/bk-log-collector
+    version: {{ index .Values.version "bk-log-collector" }}
+    missingFileHandler: Warn
+    values:
+    - ./environments/default/bklog-collector-values.yaml.gotmpl
+    - ./environments/default/bklog-collector-custom-values.yaml.gotmpl

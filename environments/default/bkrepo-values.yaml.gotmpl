@@ -1,0 +1,149 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+
+## bkDomainScheme配置
+bkDomainScheme: {{ .Values.bkDomainScheme }}
+
+# metrics采集配置
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+
+## 日志采集配置
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  service:
+    dataId: 1110007
+  gatewayAccess:
+    dataId: 1110008
+  gatewayError:
+    dataId: 1110009
+
+persistence:
+  size: {{ .Values.bkrepo.size }}
+mongodb:
+  enabled: false
+externalMongodb:
+  uri: mongodb://{{ .Values.bkrepo.externalMongodb.username }}:{{ .Values.bkrepo.externalMongodb.password }}@{{ .Values.mongodb.host_port }}/{{ .Values.bkrepo.externalMongodb.database }}?replicaSet={{ .Values.mongodb.rsName }}
+nginx-ingress-controller:
+  enabled: false
+common:
+  username: {{ .Values.bkrepo.common.username }}
+  password: {{ .Values.bkrepo.common.password }}
+docker:
+  enabled: true
+
+## 初始化配置
+init:
+  # 初始化bk-ci(蓝盾)导航
+  entrance:
+    enabled: false
+    bkCiProjectInnerUrl:
+  ## BCS(容器管理平台) repo配置
+  bcs:
+    enabled: true
+    publicImageUrl: https://hub.bktencent.com/blueking
+    publicChartUrl: https://hub.bktencent.com/chartrepo/blueking
+
+## 网关配置
+gateway:
+  ## bkrepo 地址
+  host: bkrepo.{{ .Values.domain.bkDomain }}
+  ## bkrepo docker仓库地址
+  dockerHost: docker.{{ .Values.domain.bkDomain }}
+  ## bkrepo helm仓库地址
+  helmHost: helm.{{ .Values.domain.bkDomain }}
+  ## dns服务器地址，用于配置nginx resolver。local=on为openrestry语法，取本机/etc/resolv.conf配置
+  dnsServer: local=on
+  ## 网关访问微服务认证信息
+  authorization: "Platform MThiNjFjOWMtOTAxYi00ZWEzLTg5YzMtMWY3NGJlOTQ0YjY2OlVzOFpHRFhQcWs4NmN3TXVrWUFCUXFDWkxBa00zSw=="
+  ## 部署模式，standalone: 独立模式，ci: 与ci搭配模式, saas模式：部署在蓝鲸paas上
+  deployMode: saas
+  ## 登陆校验模式，ticket or token or ci
+  authMode: token
+  ## ci模式必填，蓝鲸paas域名
+  bkPaasUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}
+  ## ci模式必填，登录地址
+  bkLoginUrl: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}/login
+  ## ci模式必填，ssm ip
+  ssmIP0: bkssm-web.{{ .Values.namespace }}.svc.cluster.local
+  ## ci模式必填，ssm host
+  ssmHost: bkssm-web.{{ .Values.namespace }}.svc.cluster.local
+  ## ci模式必填，ssm port
+  ssmPort: 80
+  ## ci模式必填，ssm token url
+  ssmTokenUrl: /api/v1/auth/access-tokens
+  ## ci模式必填，ssm env
+  ssmEnv: prod
+  ## ci模式必填，app code
+  appCode: bk_repo
+  ## ci模式必填，app token
+  appToken: {{ .Values.appSecret.bk_repo }}
+  ## bkrepo gateway service配置
+  service:
+    type: NodePort
+    nodePort: 30025
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1500Mi
+
+auth:
+  ## bcs account配置
+  bcs:
+    accessKey: "bk_bcs_app"
+    secretKey: "{{ .Values.appSecret.bk_bcs_app }}"
+  config:
+    ## 指定realm类型，支持local/devops
+    realm: local
+    ## realm 指定为devops配置
+    devops:
+      # bkci accountId in bkrepo
+      appId: bkdevops
+      # bkci appId set
+      appIdSet: bkdevops,bkrepo,codecc,bcs
+      # bcs appId
+      bcsAppId: bcs
+      # bkrepo appId
+      bkrepoAppId: bkrepo
+      # bkci auth server url
+      ciAuthServer: {{ .Values.bkDomainScheme }}://devops.{{ .Values.domain.bkDomain }}
+      # bkci auth token
+      ciAuthToken: {{ .Values.appSecret.bk_ci }}
+
+helm:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1500Mi
+npm:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1500Mi
+
+pypi:
+  enabled: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 1500Mi
+
+repository:
+  config:
+    # 软删除后，清理并释放磁盘空间的间隔时间
+    deletedNodeReserveDays: 0
+

@@ -1,0 +1,42 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+
+# Server基础配置
+server:
+  bcs:
+    # bcs集群ID
+    clusterID: BCS-K8S-00000
+    # bcs请求api地址
+    apiAddress: http://bcs-api-gateway.bcs-system.svc.cluster.local:9080
+    # 编译加速pod最小cpu
+    cpuPerInstance: 2
+    # 编译加速pod最小内存
+    memPerInstance: 4096
+
+  # 编译加速主页面
+  host: bktbs.{{ .Values.domain.bkDomain }}
+
+mariadb:
+  primary:
+    persistence:
+      # 数据库pvc容量大小，tke只能支持10的倍数,下面同理
+      size: 10Gi
+  secondary:
+    persistence:
+      size: 10Gi
+etcd:
+  persistence:
+    size: 10Gi
+
+# 日志监控配置
+bkLogConfig:
+  enable: {{ .Values.bkLogConfig.enabled }}
+  server:
+    dataId: 1
+  gateway:
+    dataId: 1
+  dashboard:
+    dataId: 1
+
+ServiceMonitor:
+  enable: {{ .Values.serviceMonitor.enabled }}

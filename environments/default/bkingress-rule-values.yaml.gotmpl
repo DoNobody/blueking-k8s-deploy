@@ -1,0 +1,6 @@
+ingress:
+  enabled: true
+  hostname: apps.{{ .Values.domain.bkDomain }}
+  extraHosts:
+    - name: lesscode.{{ .Values.domain.bkDomain }}
+      path: /

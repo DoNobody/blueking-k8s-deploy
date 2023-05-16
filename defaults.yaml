@@ -1,0 +1,16 @@
+# Path to alternative helm binary (--helm-binary)
+helmBinary: /usr/local/bin/helm
+
+# Default values to set for args along with dedicated keys that can be set by contributors, cli args take precedence over these.
+# In other words, unset values results in no flags passed to helm.
+# See the helm usage (helm SUBCOMMAND -h) for more info on default values when those flags aren't provided.
+helmDefaults:
+  cleanupOnFail: false               #dedicated default key for helm flag --cleanup-on-fail
+  # wait for k8s resources via --wait. (default false)
+  wait: true
+  # if set and --wait enabled, will wait until all Jobs have been completed before marking the release as successful. It will wait for as long as --timeout (default false, Implemented in Helm3.5)
+  waitForJobs: true
+  # time in seconds to wait for any individual Kubernetes operation (like Jobs for hooks, and waits on pod/pvc/svc/deployment readiness) (default 300)
+  timeout: 600
+  # when using helm 3.2+, automatically create release namespaces if they do not exist (default true)
+  createNamespace: true

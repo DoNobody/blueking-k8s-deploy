@@ -1,0 +1,16 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+image:
+  tag: 2.7.0-debian-10-r1
+persistence:
+  size: 30Gi
+logPersistence:
+  size: 30Gi
+zookeeper:
+  enabled: true
+  persistence:
+    size: 10Gi
+logRetentionHours: 48
+logRetentionBytes: _524288000
+logSegmentBytes: _104857600
+

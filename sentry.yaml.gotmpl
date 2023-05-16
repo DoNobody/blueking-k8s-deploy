@@ -1,0 +1,32 @@
+bases:
+  - defaults.yaml
+---
+bases:
+  - env.yaml
+---
+releases:
+  - name: sentry
+    namespace: {{ .Values.namespace }}
+    chart: ./charts/sentry-{{ .Values.version.sentry }}.tgz
+    version: {{ .Values.version.sentry }}
+    values:
+      - user:
+          create: true
+          email: {{ .Values.sentry.user.email }}
+          password: {{ .Values.sentry.user.password }}
+      - service:
+          type: ClusterIP
+      - ingress:
+          enabled: true
+          annotations:
+            kubernetes.io/ingress.class: "nginx"
+            certmanager.k8s.io/acme-challenge-type: http01
+          hostname: sentry.{{ .Values.domain.bkDomain }}
+      - postgresql:
+          password: {{ .Values.sentry.postgresql.password }}
+          postgresqlPassword: {{ .Values.sentry.postgresql.postgresqlPassword }}
+      - redis:
+          password: {{ .Values.sentry.redis.password }}
+      - metrics:
+          enabled: true
+

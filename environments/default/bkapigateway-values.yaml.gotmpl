@@ -1,0 +1,327 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+  bkDomain: {{ .Values.domain.bkDomain }}
+  bkDomainScheme: {{ .Values.bkDomainScheme }}
+
+encryptKey: {{ .Values.bkapigateway.encryptKey }}
+managers: ["admin"]
+keys:
+  apigatewayAppSecret: {{ .Values.appSecret.bk_apigateway }}
+  apigatewayTestAppSecret: {{ .Values.appSecret.bk_apigw_test }}
+  paas2AppSecret: {{ .Values.appSecret.bk_paas }}
+
+bkrepoConfig:
+  endpoint: {{ .Values.bkDomainScheme }}://bkrepo.{{ .Values.domain.bkDomain }}
+  bkpaas3Username: {{ .Values.paas.bkrepo.bkpaas3Username }}
+  bkpaas3Password: {{ .Values.paas.bkrepo.bkpaas3Password }}
+mariadb:
+  enabled: false
+externalDatabase:
+  # 新版 apigateway 数据库
+  apigw:
+    host: {{ .Values.mysql.host }}
+    port: {{ .Values.mysql.port }}
+    user: root
+    password: {{ .Values.mysql.rootPassword }}
+    name: "bk_apigateway"
+  # 新版 esb 数据库（不可复用旧 esb 数据库）
+  esb:
+    host: {{ .Values.mysql.host }}
+    port: {{ .Values.mysql.port }}
+    user: root
+    password: {{ .Values.mysql.rootPassword }}
+    name: "bk_esb"
+  # legacyEsb 数据库
+  # 从二进制环境升级时，需要配置旧版的ESB的数据库信息，用于同步存量的信息
+#  legacyEsb:
+#    # 如需启用请补全，可选
+#    host: {{ .Values.mysql.host }}
+#    port: {{ .Values.mysql.port }}
+#    user: root
+#    password: {{ .Values.mysql.rootPassword }}
+#    name: "open_paas"
+
+redis:
+  enabled: false
+externalRedis:
+  # 默认 Redis 连接信息
+  default:
+    host: {{ .Values.redis.host }}
+    port: {{ .Values.redis.port }}
+    password: {{ .Values.redis.password }}
+    passwordEncrypted: ""
+    db: 0
+
+externalElasticsearch:
+  # 默认 Elasticsearch 连接信息
+  default:
+    host: {{ .Values.elasticsearch.host }}
+    port: {{ .Values.elasticsearch.port }}
+    user: {{ .Values.elasticsearch.username }}
+    password: {{ .Values.elasticsearch.password }}
+    passwordEncrypted: ""
+
+dashboard:
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    stdoutDataId: 1110006
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  bkApigwApiLogEsIndex: "2_bklog_bkapigateway_apigateway_container*"
+  bkEsbApiLogEsIndex: "2_bklog_bkapigateway_esb_container*"
+  resources:
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+    requests:
+      cpu: "200m"
+      memory: "256Mi"
+{{ readFile "./bkapigateway_builtin_keypair.yaml" | indent 2 }}
+dashboardFe:
+  resources:
+    limits:
+      cpu: "200m"
+      memory: "1Gi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+
+apiSupport:
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    stdoutDataId: 1110005
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  resources:
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+
+apiSupportFe:
+  resources:
+    limits:
+      cpu: "200m"
+      memory: "1Gi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+
+apigateway:
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    containerDataId: 1110003
+    stdoutDataId: 1110004
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  resources:
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+    requests:
+      cpu: "1000m"
+      memory: "256Mi"
+
+caddy:
+  resources:
+    limits:
+      cpu: "200m"
+      memory: "1Gi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+
+k8sWaitFor:
+  resources:
+    limits:
+      cpu: "200m"
+      memory: "1Gi"
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+
+bkEsb:
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    stdoutDataId: 1110002
+    containerDataId: 1110001
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  resources:
+    limits:
+      cpu: "2000m"
+      memory: "4Gi"
+    requests:
+      cpu: "1000m"
+      memory: "256Mi"
+  certs:
+    - name: gse_esb_api_client.crt
+      base64Encoded: {{ readFile "cert/gse_esb_api_client.crt" | b64enc }}
+    - name: gse_esb_api_client.key
+      base64Encoded: {{ readFile "cert/gse_esb_api_client.key" | b64enc }}
+    - name: job_esb_api_client.crt 
+      base64Encoded: {{ readFile "cert/job_esb_api_client.crt" | b64enc }}
+    - name: job_esb_api_client.key 
+      base64Encoded: {{ readFile "cert/job_esb_api_client.key" | b64enc }}
+    - name: gseca.crt
+      base64Encoded: {{ readFile "cert/gseca.crt" | b64enc }}
+
+  ## esb 免用户认证应用白名单，填写 app code
+  ##
+  userVerificationExemptedApps:
+  - bk_paas
+  - bk_iam
+  - bk_apigateway
+  - bk_apigw_test
+  - bk_cmdb
+  - bk_job
+  - bk_gse
+  - bk_paas3
+  - bk_usermgr
+  - bk_ci
+  - bk_monitorv3
+  - bk_bkdata
+  - bk_log_search
+  - bk_bcs_app
+  - bk_codecc
+  - bk_itsm
+  - bk_sops
+  - bk_lesscode
+  - bk_nodeman
+  - bk_gsekit
+
+  ## 自定义组件 configmap 名称
+  ##
+  customComponentConfigMaps:
+    # - configmap: "bk-esb-custom-component-configmap"
+    #   mountPath: "my_component"
+
+## 蓝鲸 Login url（浏览器跳转登录用的 URL 前缀）
+##
+bkLoginUrl: "{{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}/login/"
+
+## 蓝鲸登录后台的内部服务地址（一般用于校验登录token）
+##
+bkLoginApiUrl: "http://bk-login-web"
+
+## BKAuth API 地址
+##
+bkAuthApiUrl: "http://bkauth"
+
+## 蓝鲸凭证管理后台 API 地址
+##
+bkSsmApiUrl: "http://bkssm-web"
+
+## 蓝鲸文档中心 URL
+##
+bkDocsCenterUrl: "https://bk.tencent.com/docs"
+
+## 蓝鲸文档中心后台 API 地址
+##
+bkDocsCenterApiUrl: "{{ .Values.bkDomainScheme }}://apps.{{ .Values.domain.bkDomain }}/bk--docs--center"
+
+## 蓝鲸配置平台后台 API 地址
+##
+bkCmdbApiUrl: "http://bk-cmdb-api"
+
+## 蓝鲸作业平台后台 API 访问地址
+##
+bkJobApiBackendUrl: "https://bk-job-gateway"
+
+## 蓝鲸用户管理后台 API 地址
+##
+bkUserApiUrl: "http://bkuserapi-web"
+
+## 蓝鲸权限中心SaaS的后台 API 地址
+##
+bkIamSaasApiUrl: "http://bkiam-saas-api"
+
+## 蓝鲸 GSEKIT SaaS URL
+##
+bkGsekitUrl: "{{ .Values.bkDomainScheme }}://apps.{{ .Values.domain.bkDomain }}/bk--gsekit"
+
+## 蓝鲸流程管理 SaaS URL
+##
+bkItsmUrl: "{{ .Values.bkDomainScheme }}://apps.{{ .Values.domain.bkDomain }}/bk--itsm"
+
+## 蓝鲸标准运维 SaaS URL
+##
+bkSopsUrl: "{{ .Values.bkDomainScheme }}://apps.{{ .Values.domain.bkDomain }}/prod--api--bk--sops"
+
+## 蓝鲸日志平台后台 API URL
+##
+bkLogSearchApiUrl: "http://bk-log-search-api"
+
+## 蓝鲸监控平台后台 API URL
+##
+bkMonitorApiUrl: "http://bk-monitor-api"
+
+## 蓝鲸节点管理 SaaS backend 模块 URL
+##
+bkNodemanApiUrl: "http://bk-nodeman-backend-api"
+
+## 蓝鲸管控平台 cacheapi 模块 API 地址
+##
+bkGseCacheapiHost: "bk-gse-task"
+bkGseCacheapiPort: "59313"
+
+## 蓝鲸管控平台插件管理后台 API 地址
+##
+bkGsePmsUrl: "http://bk-gse-proc:52030"
+
+## 蓝鲸管控平台配置后台 API 地址
+##
+bkGseConfigUrl: "http://bk-gse-data:59702"
+
+## bk-data
+##
+bkDataUrl: "http://bk-data.{{ .Values.domain.bkDomain }}"
+
+## bk-data-bksql
+##
+bkDataBksqlUrl: "http://bk-data-bksql.{{ .Values.domain.bkDomain }}"
+
+## bk-data-processorapi
+##
+bkDataProcessorapiUrl: "http://bk-data-processorapi.{{ .Values.domain.bkDomain }}"
+
+## bk-data-modelflow
+##
+bkDataModelflowUrl: "http://bk-data-modelflow.{{ .Values.domain.bkDomain }}"
+
+## 计算平台后台服务 API 地址，默认是固定bkbase的namespace
+##
+bkDataV3AuthapiUrl: "http://bkbase-authapi.bkbase.svc.cluster.local:8000"
+bkDataV3AccessapiUrl: "http://bkbase-datahubapi.bkbase.svc.cluster.local:8000"
+bkDataV3DatabusapiUrl: "http://bkbase-datahubapi.bkbase.svc.cluster.local:8000"
+bkDataV3DataflowapiUrl: "http://bkbase-dataflowapi.bkbase.svc.cluster.local:8000"
+bkDataV3DatamanageapiUrl: "http://bkbase-datamanageapi.bkbase.svc.cluster.local:8000"
+bkDataV3DataqueryapiUrl: "http://bkbase-queryengine-api.bkbase.svc.cluster.local:8000"
+bkDataV3MetaapiUrl: "http://bkbase-metaapi.bkbase.svc.cluster.local:8000"
+bkDataV3StorekitapiUrl: "http://bkbase-datahubapi.bkbase.svc.cluster.local:8000"
+bkDataV3BksqlUrl: "http://bkbase-bksqlextend-service.bkbase.svc.cluster.local:8596"
+bkDataV3ModelapiUrl: ""
+bkDataV3DatacubeapiUrl: ""
+bkDataV3AlgorithmapiUrl: ""
+bkDataV3DatalabapiUrl: "http://bkbase-datalabapi.bkbase.svc.cluster.local:8000"
+bkDataV3AiopsapiUrl: "http://bkbase-aiopsapi.bkbase.svc.cluster.local:8000"
+bkDataV3ResourcecenterapiUrl: "http://bkbase-resourcecenterapi.bkbase.svc.cluster.local:8000"
+
+## fta
+##
+bkFtaUrl: "http://bk-fta.{{ .Values.domain.bkDomain }}"
+
+## devops (旧版)
+##
+bkDevopsUrl: "http://bk-devops.{{ .Values.domain.bkDomain }}"
+
+## cicdkit
+##
+bkCicdkitUrl: "http://bk-cicdkit.{{ .Values.domain.bkDomain }}"
+
+## bscp
+##
+bkBscpApiUrl: "http://bk-bscp-api.{{ .Values.domain.bkDomain }}"
+

@@ -1,0 +1,217 @@
+global:
+  bkDomain: {{ .Values.domain.bkDomain }}
+  appCode: bk_monitorv3
+  appSecret: {{ .Values.appSecret.bk_monitorv3 }}
+  bkComponentApiUrl: {{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}
+
+redis:
+  enabled: false
+externalRedis:
+  monitor:
+    host: {{ .Values.redis.host }}
+    password: {{ .Values.redis.password }}
+    port: {{ .Values.redis.port }}
+    sentinel: false
+  transfer:
+    host: {{ .Values.redis.host }}
+    password: {{ .Values.redis.password }}
+    port: {{ .Values.redis.port }}
+    sentinel: false
+
+consul:
+  enabled: false
+externalConsul:
+  host: bk-consul-headless
+  port: 8500
+
+elasticsearch:
+  enabled: false
+externalElasticSearch:
+  enabled: true
+  host: {{ .Values.elasticsearch.host }}
+  password: {{ .Values.elasticsearch.password }}
+  restPort: {{ .Values.elasticsearch.port }}
+  transportPort: 9300
+  username: {{ .Values.elasticsearch.username }}
+
+kafka:
+  enabled: false
+externalKafka:
+  host: bk-kafka
+  port: 9092
+
+influxdb:
+  enabled: false
+externalInfluxdb:
+  hosts:
+  - bk-influxdb
+  password: "foo"
+  port: 8086
+  username: "foo"
+
+mysql:
+  enabled: false
+externalDatabase:
+  enabled: true
+  host: {{ .Values.mysql.host }}
+  port: {{ .Values.mysql.port }}
+  username: root
+  password: {{ .Values.mysql.rootPassword }}
+  name: bk_monitor
+  grafana:
+    name: bk_monitor_grafana
+
+rabbitmq:
+  enabled: false
+
+externalRabbitmq:
+  enabled: true
+  host: bk-rabbitmq
+  port: 5672
+  username: {{ .Values.bkmonitor.rabbitmq.user }}
+  password: {{ .Values.bkmonitor.rabbitmq.password }}
+  vhost: {{ .Values.bkmonitor.rabbitmq.vhost }}
+
+transfer:
+  enabled: true
+  replicas: 1
+  image:
+    registry: {{ .Values.imageRegistry }}
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110022
+  resources:
+    requests:
+      memory: 100Mi
+      cpu: 200m
+    limits:
+      memory: 1Gi
+      cpu: 2000m
+
+unify-query:
+  enabled: true
+  replicas: 1
+  image:
+    registry: {{ .Values.imageRegistry }}
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110023
+  resources:
+    requests:
+      memory: 100Mi
+      cpu: 200m
+    limits:
+      memory: 1Gi
+      cpu: 2000m
+
+influxdb-proxy:
+  enabled: true
+  replicas: 1
+  image:
+    registry: {{ .Values.imageRegistry }}
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110024
+  resources:
+    requests:
+      memory: 100Mi
+      cpu: 200m
+    limits:
+      memory: 1Gi
+      cpu: 2000m
+
+ingester:
+  enabled: true
+  replicas: 1
+  image:
+    registry: {{ .Values.imageRegistry }}
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110025
+  resources:
+    requests:
+      memory: 200Mi
+      cpu: 200m
+    limits:
+      memory: 2Gi
+      cpu: 2000m
+
+monitor:
+  enabled: true
+  bkLogConfig:
+    enabled: {{ .Values.bkLogConfig.enabled }}
+    dataId: 1110021
+  serviceMonitor:
+    enabled: {{ .Values.serviceMonitor.enabled }}
+  config:
+    platform: community
+    bkPaasHost: {{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}
+    bkIamResourceApiHost: http://bk-monitor-web/
+
+    # bkrepo
+    useBkRepo: true
+    bkRepoUrl: {{ .Values.bkDomainScheme }}://bkrepo.{{ .Values.domain.bkDomain }}
+    bkRepoUser: {{ .Values.bkmonitor.bkrepo.user }}
+    bkRepoPaasword: {{ .Values.bkmonitor.bkrepo.password }}
+    bkRepoProject: {{ .Values.bkmonitor.bkrepo.project }}
+    bkRepoBucket: {{ .Values.bkmonitor.bkrepo.repoName }}
+
+    # bcs
+    bcsApiGatewayHost: bcs-api-gateway.bcs-system.svc.cluster.local
+    bcsApiGatewayPort: 80
+    bcsApiGatewaySchema: http
+    bcsApiGatewayToken: "xxxx"
+    bcsCcApiUrl: http://bcs-ui-cc.bcs-system.svc.cluster.local:5000
+
+    # bknodeman
+    bkNodemanUrl: "{{ .Values.bkDomainScheme }}://bknodeman.{{ .Values.domain.bkDomain }}"
+    bkIamUrl: {{ .Values.bkDomainScheme }}://bkiam.{{ .Values.domain.bkDomain }}
+  image:
+    registry: {{ .Values.imageRegistry }}
+  saas:
+    enabled: true
+    web:
+      enabled: true
+      replicaCount: 1
+      resources:
+        requests:
+          memory: 200Mi
+          cpu: 200m
+        limits:
+          memory: 4Gi
+          cpu: 2000m
+    worker:
+      enabled: true
+      replicaCount: 1
+      resources:
+        requests:
+          memory: 200Mi
+          cpu: 200m
+        limits:
+          memory: 4Gi
+          cpu: 2000m
+    beat:
+      enabled: true
+      resources:
+        requests:
+          memory: 200Mi
+          cpu: 200m
+        limits:
+          memory: 4Gi
+          cpu: 2000m
+
+grafana:
+  enabled: true
+  admin:
+    user: admin
+    password: admin
+  image:
+    registry: "{{ .Values.imageRegistry }}"

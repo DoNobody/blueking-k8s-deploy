@@ -1,0 +1,158 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+  bkDomain: {{ .Values.domain.bkDomain }}
+  bkDomainScheme: {{ .Values.bkDomainScheme }}
+
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  dataId: 1110031
+
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+
+nginx-ingress-controller:
+  enabled: false
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hostname: "bknodeman.{{ .Values.domain.bkDomain }}"
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "1024m"
+
+## 蓝鲸 PaaS url（浏览器访问蓝鲸入口）
+bkPaasUrl: "{{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}"
+
+## 蓝鲸 Login url（浏览器跳转登录用的URL前缀）
+bkLoginUrl: "{{ .Values.bkDomainScheme }}://{{ .Values.domain.bkMainSiteDomain }}/login"
+
+## 蓝鲸 ESB url，注意集群内外都是统一域名。集群内可以配置域名解析到内网ip
+bkComponentApiUrl: "{{ .Values.bkDomainScheme }}://bkapi.{{ .Values.domain.bkDomain }}"
+
+## 节点管理浏览器访问地址
+bkNodemanUrl: "{{ .Values.bkDomainScheme }}://bknodeman.{{ .Values.domain.bkDomain }}"
+## 节点管理后台访问地址
+bkNodemanApiUrl: "http://bk-nodeman-backend-api"
+
+## 蓝鲸作业平台浏览器访问地址
+bkJobUrl: "{{ .Values.bkDomainScheme }}://job.{{ .Values.domain.bkDomain }}"
+
+## 蓝鲸权限中心 SaaS 地址
+bkIamUrl: "{{ .Values.bkDomainScheme }}://bkiam.{{ .Values.domain.bkDomain }}"
+## 蓝鲸权限中心后台 API 地址
+bkIamApiUrl: "{{ .Values.bkDomainScheme }}://bkiam-api.{{ .Values.domain.bkDomain }}"
+## 蓝鲸制品库地址
+bkRepoUrl: "{{ .Values.bkDomainScheme }}://bkrepo.{{ .Values.domain.bkDomain }}"
+
+config:
+  appCode: "bk_nodeman"
+  appSecret: {{ .Values.appSecret.bk_nodeman }}
+  bkAppRunEnv: "ce"
+
+  bkRepoProject: "blueking"
+  bkRepoPassword: {{ .Values.bknodeman.bkrepo.password }}
+  bkRepoUsername: {{ .Values.bknodeman.bkrepo.username }}
+  bkRepoPublicBucket: {{ .Values.bknodeman.bkrepo.repoName }}
+  bkRepoUrl: "{{ .Values.bkDomainScheme }}://bkrepo.{{ .Values.domain.bkDomain }}"
+
+  ## 蓝鲸管控平台 Agent，AgentXXDir 仅在初次部署有效，后续可以在页面「全局配置」维护
+  ##
+  ## 是否启用 GSE 服务探测，为 `true` 将定期更新默认接入点的 gse svr 信息
+  gseEnableSvrDisCovery: true
+  ## ZK hosts 信息，host:port，多个 hosts 以 `,` 分隔
+  bkAppGseZkHost: {{ .Values.gse.zookeeper.hosts }}
+  ## ZK 认证信息，用户名:密码
+  bkAppGseZkAuth: {{ .Values.gse.zookeeper.token }}
+  ## Linux Agent 安装目录
+  bkAppGseAgentHome: "/usr/local/gse"
+  ## Linux Agent 日志目录
+  bkAppGseAgentLogDir: "/var/log/gse"
+  ## Linux Agent 运行目录
+  bkAppGseAgentRunDir: "/var/run/gse"
+  ## Linux Agent 数据目录
+  bkAppGseAgentDataDir: "/var/lib/gse"
+  ## Windows Agent 安装目录
+  bkAppGseWinAgentHome: "C:\\\\gse"
+  ## Windows Agent 日志目录
+  bkAppGseWinAgentLogDir: "C:\\\\gse\\\\logs"
+  ## Windows Agent 运行目录
+  bkAppGseWinAgentRunDir: "C:\\\\gse\\\\data"
+  ## Windows Agent 数据目录
+  bkAppGseWinAgentDataDir: "C:\\\\gse\\\\data"
+
+backend:
+  enabled: true
+  miniDeploy: true
+  api:
+    replicaCount: 1
+    service:
+      type: "NodePort"
+      port: 80
+      nodePort: 30300
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 2048Mi
+      requests:
+        cpu: 300m
+        memory: 512Mi
+  celeryBeat:
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1024Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+  ## 仅在 backend.miniDeploy=true 时启用
+  commonWorker:
+    enabled: true
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 2048Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+  ## 仅在 backend.miniDeploy=true 时启用
+  commonPipelineWorker:
+    enabled: true
+    replicaCount: 1
+    resources:
+      limits:
+        cpu: 2000m
+        memory: 2048Mi
+      requests:
+        cpu: 200m
+        memory: 256Mi
+
+## External Redis configuration
+##
+redis:
+  enabled: false
+externalRedis:
+  architecture: "standalone"
+  host: {{ .Values.redis.host }}
+  port: {{ .Values.redis.port }}
+  password: {{ .Values.redis.password }}
+
+mysql:
+  enabled: false
+externalMySQL:
+  host: {{ .Values.mysql.host }}
+  port: {{ .Values.mysql.port }}
+  username: root
+  password: {{ .Values.mysql.rootPassword }}
+  database: "bk_nodeman"
+
+rabbitmq:
+  enabled: false
+externalRabbitMQ:
+  host: {{ .Values.rabbitmq.host }}
+  port: {{ .Values.rabbitmq.port }}
+  vhost: {{ .Values.bknodeman.rabbitmq.vhost }}
+  username: {{ .Values.bknodeman.rabbitmq.user }}
+  password: {{ .Values.bknodeman.rabbitmq.password }}
+

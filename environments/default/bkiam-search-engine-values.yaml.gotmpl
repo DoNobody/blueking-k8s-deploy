@@ -1,0 +1,59 @@
+global:
+  imageRegistry: {{ .Values.imageRegistry }}
+nameOverride: "bkiam-search-engine"
+fullnameOverride: "bkiam-search-engine"
+resources:
+  limits:
+    cpu: 2000m
+    memory: 2048Mi
+  requests:
+    memory: 128Mi
+    cpu: 100m
+ingress:
+  enabled: false
+bkLogConfig:
+  enabled: {{ .Values.bkLogConfig.enabled }}
+  dataId: 1110014
+serviceMonitor:
+  enabled: {{ .Values.serviceMonitor.enabled }}
+
+## @section IAM Backend
+backend:
+  addr: "http://bkiam-web"
+  authorization:
+    appCode: "bk_iam"
+    appSecret: "{{ .Values.appSecret.bk_iam }}"
+
+## 接入apigateway分配的publicKey
+bkApigatewayPublicKey: {{ index .Values.builtinGateway "bk-iam" "publicKeyBase64"  }}
+
+elasticsearch:
+  enabled: false
+
+externalElasticsearch:
+  default:
+    addresses:
+      - http://{{ .Values.elasticsearch.host }}:{{ .Values.elasticsearch.port }}
+    username: {{ .Values.elasticsearch.username }}
+    password: {{ .Values.elasticsearch.password }}
+## @section Elasticsearch configs
+index:
+  elasticsearch:
+    ## @param index.elasticsearch.indexName is the index name of bkiam-search-engine-search-engine in elasticsearch
+    ##
+    indexName: iam_policy
+    ## @param index.elasticsearch.maxRetries is the retry times while call elasticsearch API
+    ##
+    maxRetries: 3
+
+externalRedis:
+  default:
+    host: {{ .Values.redis.host }}
+    port: {{ .Values.redis.port }}
+    password: {{ .Values.redis.password }}
+    db: 0
+
+persistence:
+  enabled: true
+  size: 10Gi
+
